@@ -1,19 +1,31 @@
 import { parseProgress, type Progress } from '../lib/progress';
 const inputs = [...document.querySelectorAll<HTMLInputElement>('[data-task]')];
 const ids = inputs.map(input => input.dataset.task!);
-const key = `wdl:roadmap:v1:${import.meta.env.BASE_URL}`;
+const key = `wdl:cisco-nb2:roadmap:v1:${import.meta.env.BASE_URL}`;
 const status = document.querySelector<HTMLElement>('#storage-status')!;
 let completed = new Set<string>();
 const update = () => {
   inputs.forEach(input => { input.checked = completed.has(input.dataset.task!); });
-  document.querySelector('#progress-label')!.textContent = `${completed.size} de ${ids.length} habilidades`;
+  document.querySelector('#progress-label')!.textContent = `${completed.size} de ${ids.length} temas`;
   document.querySelector('#progress-percent')!.textContent = `${Math.round(completed.size / ids.length * 100)}%`;
   document.querySelector<HTMLProgressElement>('#total-progress')!.value = completed.size;
   document.querySelectorAll<HTMLElement>('[data-stage]').forEach(stage => {
-    const tasks = [...stage.querySelectorAll<HTMLInputElement>('input')];
-    stage.querySelector('.stage-count')!.textContent = `${tasks.filter(task => task.checked).length} / ${tasks.length}`;
+    const tasks = [...stage.querySelectorAll<HTMLInputElement>('[data-task]')];
+    const count = tasks.filter(task => task.checked).length;
+    stage.querySelector('.stage-count')!.textContent = `${count} / ${tasks.length}`;
+    const toggle = stage.querySelector<HTMLInputElement>('[data-module-toggle]')!;
+    toggle.checked = count === tasks.length;
+    toggle.indeterminate = count > 0 && count < tasks.length;
   });
+  const modules = [...document.querySelectorAll<HTMLInputElement>('[data-module-toggle]')];
+  document.querySelector('#modules-progress')!.textContent = `${modules.filter(toggle => toggle.checked).length} de ${modules.length} módulos completados`;
 };
+document.querySelectorAll<HTMLInputElement>('[data-module-toggle]').forEach(toggle => toggle.addEventListener('change', () => {
+  toggle.closest('[data-stage]')!.querySelectorAll<HTMLInputElement>('[data-task]').forEach(task => {
+    toggle.checked ? completed.add(task.dataset.task!) : completed.delete(task.dataset.task!);
+  });
+  update(); save();
+}));
 const data = (): Progress => ({ version: 1, completed: [...completed], updatedAt: new Date().toISOString() });
 const save = () => {
   try { localStorage.setItem(key, JSON.stringify(data())); status.textContent = 'Progreso guardado en este navegador.'; }
@@ -30,7 +42,7 @@ inputs.forEach(input => input.addEventListener('change', () => {
 }));
 document.querySelector('#export-progress')?.addEventListener('click', () => {
   const url = URL.createObjectURL(new Blob([JSON.stringify(data(), null, 2)], { type: 'application/json' }));
-  const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'walter-roadmap.json'; anchor.click();
+  const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'walter-cisco-redes.json'; anchor.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   status.textContent = 'Respaldo preparado para descargar.';
 });

@@ -1,3 +1,15 @@
+# Actualización: plan de Cisco
+
+23 de noviembre de 2026. Se incorporaron 17 módulos y 44 temas a partir de las capturas de Walter, sin exámenes ni encuestas. La imagen repetida del módulo 6 se deduplicó.
+
+Verificación manual en navegador: marcar el módulo 1, recargar y comprobar 3/44 temas; desmarcarlo después. Abrir sus apuntes y comprobar la plantilla. Escribir un texto temporal, cambiar al módulo 2 y volver al 1: el borrador se conservó separado. Se restauró el texto de prueba. Revisión visual a 1280 y 390 píxeles. Las pruebas se realizaron en un puerto de revisión separado, sin modificar el progreso de localhost:4321.
+
+Pruebas automáticas adicionales: numeración completa de módulos, 44 IDs de tema únicos, exclusión de exámenes/encuestas y conservación de objetivos en cada plantilla.
+
+---
+
+## Registro histórico de la primera entrega
+
 # Verificación de la primera entrega
 
 Fecha: 23 de noviembre de 2026. Entorno: Windows, Node.js 26.13.0, Astro 7.4.13.

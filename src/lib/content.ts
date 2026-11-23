@@ -5,5 +5,5 @@ export const entryUrl = (entry: Entry) => withBase(`${entry.collection === 'note
 export const formatDate = (date: Date) => new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeZone: 'UTC' }).format(date);
 export const readTime = (body = '') => Math.max(1, Math.ceil(body.split(/\s+/).length / 200));
 export async function published(collection: 'notes' | 'labs') {
-  return (await getCollection(collection, ({ data }) => !data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  return (await getCollection(collection, ({ data }) => !data.draft && data.category === 'Redes' && collection === 'notes')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 }

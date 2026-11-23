@@ -3,8 +3,8 @@ import '../styles/global.css';
 import Icon from '../components/Icon.astro';
 import { withBase } from '../lib/content';
 interface Props { title: string; description?: string; active?: string; pageTitle?: string }
-const { title, description = 'Mi cuaderno de redes, sistemas y análisis forense digital.', active = 'inicio', pageTitle = title } = Astro.props;
-const navigation = [ ['inicio', '', 'Inicio', 'home'], ['diario', 'diario/', 'Diario de estudio', 'book'], ['roadmap', 'roadmap/', 'Mi roadmap', 'route'], ['laboratorios', 'laboratorios/', 'Laboratorios', 'flask'], ['herramientas', 'herramientas/', 'Herramientas', 'tools'] ];
+const { title, description = 'Mis apuntes de redes y Cisco Networking Academy.', active = 'inicio', pageTitle = title } = Astro.props;
+const navigation = [ ['inicio', '', 'Inicio', 'home'], ['diario', 'diario/', 'Diario de estudio', 'book'], ['roadmap', 'roadmap/', 'Plan de estudio', 'route'], ['herramientas', 'herramientas/', 'Herramientas', 'tools'] ];
 ---
 <!doctype html>
 <html lang="es">

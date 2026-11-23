@@ -1,3 +1,5 @@
+import { courseModules } from '../data/course';
+import { moduleTemplate } from '../lib/course-template';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 const form = document.querySelector<HTMLFormElement>('#editor-form')!;
@@ -9,11 +11,24 @@ const date = document.querySelector<HTMLInputElement>('#entry-date')!;
 const body = document.querySelector<HTMLTextAreaElement>('#entry-body')!;
 const preview = document.querySelector<HTMLElement>('#editor-preview')!;
 const status = document.querySelector<HTMLElement>('#editor-status')!;
-const key = `wdl:draft:v1:${import.meta.env.BASE_URL}`;
+const selectedModule = courseModules.find(module => module.id === new URLSearchParams(location.search).get('modulo'));
+const key = selectedModule ? `wdl:cisco-nb2:draft:v1:${import.meta.env.BASE_URL}:${selectedModule.id}` : `wdl:draft:v1:${import.meta.env.BASE_URL}`;
+const moduleSelector = document.querySelector<HTMLSelectElement>('#module-selector')!;
+moduleSelector.value = selectedModule?.id ?? '';
+moduleSelector.addEventListener('change', () => {
+  const url = new URL(location.href);
+  moduleSelector.value ? url.searchParams.set('modulo', moduleSelector.value) : url.searchParams.delete('modulo');
+  location.assign(url);
+});
 const now = new Date();
 date.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-type.value = new URLSearchParams(location.search).get('tipo') === 'laboratorio' ? 'labs' : 'notes';
-body.value = type.value === 'labs' ? '## Objetivo\n\n¿Qué quiero comprobar?\n\n## Entorno\n\nEquipo, sistema y archivos de práctica.\n\n## Procedimiento\n\n1. Primer paso.\n\n## Evidencias\n\nCapturas y observaciones.\n\n## Conclusiones y límites\n\n¿Qué puedo afirmar y qué falta verificar?\n' : '## Lo que aprendí\n\nEscribe la idea principal con tus propias palabras.\n\n## Práctica\n\nComandos, observaciones y capturas.\n\n## Dudas pendientes\n\n- ¿Qué necesito repasar?\n\n## Mi próxima sesión\n\nUn paso pequeño y concreto.\n';
+type.value = 'notes';
+body.value = type.value === 'labs' ? '## Objetivo\n\n¿Qué quiero comprobar?\n\n## Entorno\n\nEquipo, sistema y archivos de práctica.\n\n## Procedimiento\n\n1. Primer paso.\n\n## Evidencias\n\nCapturas y observaciones.\n\n## Conclusiones y límites\n\n¿Qué puedo afirmar y qué falta verificar?\n' : '## Módulo del día\n\nNombre y número del módulo de Cisco.\n\n## Objetivos\n\nPega aquí los objetivos de la lección.\n\n## Descripción breve\n\nQué voy a aprender hoy.\n\n## Submódulo 1: título\n\nMis apuntes con mis propias palabras.\n\n## Submódulo 2: título\n\nMis apuntes.\n\n## Práctica\n\nComandos, observaciones y capturas.\n\n## Dudas pendientes\n\n- ¿Qué necesito repasar?\n\n## Mi próxima sesión\n\nUn paso pequeño y concreto.\n';
+if (selectedModule) {
+  title.value = `Módulo ${selectedModule.number}: ${selectedModule.title}`;
+  description.value = selectedModule.objective;
+  body.value = moduleTemplate(selectedModule);
+}
 try {
   const saved = JSON.parse(localStorage.getItem(key) || 'null');
   if (saved?.version === 1) {
@@ -23,6 +38,7 @@ try {
     status.textContent = 'Borrador local recuperado.';
   }
 } catch { status.textContent = 'No se pudo recuperar el borrador local.'; }
+category.value = 'Redes'; type.value = 'notes';
 function render() {
   preview.innerHTML = DOMPurify.sanitize(marked.parse(body.value, { async: false }), { USE_PROFILES: { html: true }, FORBID_TAGS: ['form','input','button','style'], FORBID_ATTR: ['style'] });
   preview.querySelectorAll('img').forEach(image => {

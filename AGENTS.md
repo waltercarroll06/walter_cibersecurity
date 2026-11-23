@@ -1,8 +1,10 @@
+> Alcance actual: solo redes y apuntes de Cisco, en localhost. Laboratorios y otras áreas retirados de la navegación y del contenido publicado. Checklist de Cisco configurada con 17 módulos y 44 temas. IA aún no conectada. Las descripciones anteriores de funciones futuras se conservan como referencia.
+
 # Walter's Digital Lab — guía para Codex
 
 ## Propósito
 
-Blog y cuaderno personal de Walter para redes, Windows, Linux y DFIR. La prioridad es ayudarle a estudiar y documentar; mantener una web pequeña, comprensible y extensible. Interfaz y documentación en español.
+Blog y cuaderno personal de Walter centrado actualmente en redes y Cisco. La prioridad es ayudarle a estudiar y documentar; mantener una web pequeña, comprensible y extensible. Interfaz y documentación en español.
 
 ## Arquitectura y límites
 
@@ -40,3 +42,10 @@ Las pruebas cubren importación de respaldos y búsqueda; el verificador del bui
 ## Entrega
 
 Explica en español qué cambió, cómo se verificó y qué queda pendiente. Actualiza README cuando cambie el uso. Mantén publicación y costos acordes con el alcance pedido. La publicación en Pages se inicia manualmente desde Actions; no subir ni publicar contenido privado por defecto.
+
+## Curso de Cisco
+
+- `src/data/course.ts` es la fuente de módulos, temas y objetivos extraídos de las capturas de Walter. No añadir exámenes ni encuestas.
+- Conservar IDs `cisco-nb2-*` y las claves de almacenamiento por curso y módulo. No sobrescribir borradores previos al aplicar plantillas.
+- Los porcentajes de las capturas no se importan como avance personal.
+- No añadir otros cursos o áreas a la interfaz sin petición del usuario.

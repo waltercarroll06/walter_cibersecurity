@@ -1,122 +1,81 @@
-# Walter's Digital Lab
+# Walter’s Digital Lab · Mi curso de redes
 
-Un cuaderno personal para **aprender, investigar y documentar** redes, Windows, Linux y DFIR. Nombre provisional; se puede cambiar sin rehacer el proyecto.
+Cuaderno personal de Walter para **Conceptos básicos de redes v2.0 de Cisco Networking Academy**. El alcance actual es solo redes, en localhost. La IA aún no está conectada y la web no está publicada.
 
-Primera versión funcional, preparada para Windows, VS Code, Codex y GitHub. El repositorio local contiene el código; todavía no está conectado a un repositorio remoto ni publicado.
+## Abrir en Windows
 
-## Empezar en Windows
-
-Necesitas Node.js compatible (`>=22.23.4`; recomendado Node 24 LTS) y Git. Abre **esta carpeta**, la que contiene `package.json`, en VS Code.
-
-En su terminal de PowerShell:
+Abre esta carpeta en VS Code. Necesitas Node.js compatible (>=22.23.4).
 
 ```powershell
 npm.cmd ci
 npm.cmd run dev
 ```
 
-Abre la dirección local que aparezca en la terminal, normalmente `http://127.0.0.1:4321`. Mantén la terminal abierta mientras trabajas. Para detenerla, `Ctrl+C`. `npm.cmd` evita el bloqueo de `npm.ps1` en algunas configuraciones de PowerShell.
+Abre la dirección que muestra la terminal, normalmente http://127.0.0.1:4321/. La terminal mantiene activo el servidor local. Al cerrarla se detiene la vista previa, pero tus archivos permanecen. Reinicia el comando para volver a verla.
 
-## Qué funciona
+## Plan de estudio
 
-- Inicio, diario, laboratorios y páginas individuales.
-- Markdown con encabezados, tablas, listas, código resaltado e imágenes locales.
-- Editor en el navegador con vista previa, un borrador local y descarga/copia de Markdown.
-- Búsqueda por título, contenido, etiquetas y tema, tolerante a tildes y mayúsculas.
-- Roadmap con 17 habilidades, persistencia local, exportación e importación JSON.
-- Temas claro y oscuro, diseño adaptable, navegación por teclado y etiquetas accesibles.
-- Borradores excluidos del sitio generado y del buscador.
-- Configuración para GitHub Pages, incluso bajo `/nombre-del-repositorio/`.
+El plan contiene **17 módulos y 44 temas**, organizados a partir de las capturas proporcionadas por Walter. Se conservan el orden, los nombres y los objetivos con pequeños ajustes de redacción. La captura repetida del módulo 6 se incluyó una sola vez. No se incluyen exámenes, encuestas, introducciones ni resúmenes del curso como tareas adicionales.
 
-Se incluyen dos apuntes y un laboratorio **de ejemplo**, más un borrador para comprobar su exclusión. No representan actividades completadas por Walter. La checklist empieza vacía.
+- Abre **Plan de estudio** y despliega un módulo.
+- Consulta el objetivo general y el objetivo de cada tema.
+- Marca temas individuales o usa **Marcar todo el módulo**.
+- Los contadores muestran temas completados y módulos con todos sus temas marcados.
+- Las marcas empiezan vacías. El avance es personal y no se sincroniza con Cisco.
+- Usa **Exportar respaldo** para guardar tu checklist. Importar reemplaza las marcas actuales.
 
-## Tu rutina diaria
+El progreso de este curso utiliza una clave distinta del antiguo roadmap general. El almacenamiento anterior no se elimina ni se interpreta como avance de Cisco.
 
-1. Estudia y escribe un resumen con tus palabras.
-2. Pulsa **Nuevo apunte**. Redacta, revisa y descarga el Markdown. También puedes copiar `templates/apunte.md` directamente.
-3. Guarda el archivo en `src/content/notes/`. Para prácticas usa `src/content/labs/` y `templates/laboratorio.md`.
-4. Añade capturas a `src/assets/`. Desde un apunte situado directamente en `notes/` o `labs/`, usa `![Descripción](../../assets/mi-captura.png)`.
-5. Actualiza título, fecha, tema y etiquetas. Cambia `draft: true` a `draft: false` cuando quieras que aparezca en el sitio. Tus entradas reales usan `example: false`.
-6. Guarda el archivo: el servidor local actualiza la web. Marca en el roadmap solo aquello que ya puedas explicar y practicar.
-7. Revisa los cambios en Git y súbelos cuando el repositorio remoto esté conectado.
+## Apuntes por módulo
 
-El editor no modifica el repositorio ni publica automáticamente. Su vista previa muestra imágenes HTTPS; las imágenes del proyecto se ven cuando colocas el Markdown y la imagen en sus carpetas. Cambiar el tipo de entrada no reemplaza el texto actual, para evitar perder trabajo.
+1. En el plan, pulsa **Mis apuntes del módulo**.
+2. El editor prepara título, objetivo general, lista de objetivos y apartados numerados por tema.
+3. Escribe debajo de **Mis apuntes** y añade ejemplos con tus palabras, dudas y tu resumen personal.
+4. Cambia de módulo con el selector: cada módulo tiene un borrador independiente. También existe **Apunte libre de redes**, que conserva el borrador general anterior.
+5. Usa **Descargar Markdown** para conservar una copia fuera del navegador.
 
-### Formato de una entrada
+Los borradores se guardan al escribir. No sobrescribimos un borrador existente con la plantilla. Los apuntes no aparecen automáticamente en el diario: para añadirlos, guarda el Markdown en `src/content/notes/` y cambia `draft: true` a `draft: false` cuando quieras mostrarlo. El contenido publicado se limita actualmente a Redes.
 
-```yaml
----
-title: "Mi primera sesión de redes"
-description: "Qué aprendí y qué voy a practicar."
-date: 2026-11-23
-category: Redes
-tags: [cisco, DNS]
-draft: false
-example: false
-source: "Nombre del curso, módulo y referencia"
----
+### Imágenes
+
+Coloca capturas en `src/assets/` e inclúyelas en un apunte con:
+
+```markdown
+![Descripción de la captura](../../assets/mi-captura.png)
 ```
 
-Temas admitidos: `Redes`, `Windows`, `Linux`, `DFIR`. `source` es opcional. Si falta `draft`, la entrada se considera borrador. Los nombres de archivo crean las rutas: usa minúsculas, números y guiones.
+Las imágenes del proyecto se muestran cuando el archivo está incorporado al proyecto. El editor muestra una indicación para imágenes locales; admite imágenes HTTPS en su vista previa. Revisa que las capturas no contengan datos personales antes de publicarlas.
 
-## Dónde se guarda cada cosa
+## Persistencia y respaldo
 
-| Información | Lugar | Respaldo |
-| --- | --- | --- |
-| Apuntes y laboratorios publicados | Archivos Markdown del proyecto | Git y GitHub cuando lo conectes |
-| Imágenes | `src/assets/` | Git y GitHub |
-| Checklist | localStorage del navegador | Botón Exportar respaldo |
-| Borrador del editor | localStorage del navegador, una entrada a la vez | Descargar Markdown |
-| Preferencia de tema | localStorage | No requiere respaldo |
+La checklist y los borradores viven en localStorage, separados por dirección de la web, ruta y módulo. No se sincronizan entre equipos, perfiles, navegadores o puertos. Borrar los datos del navegador puede eliminarlos: exporta la checklist y descarga tus apuntes periódicamente. Los archivos Markdown e imágenes del proyecto pueden respaldarse con Git.
 
-El progreso no viaja a GitHub ni se sincroniza entre equipos. Borrar datos del navegador, usar otro perfil o cambiar de dirección (por ejemplo, de localhost a GitHub Pages) crea un almacenamiento distinto. Exporta antes y luego importa el respaldo. Importar **reemplaza** las marcas actuales. Si cambia la ruta base de la web, también cambia su espacio de almacenamiento.
+`draft: true` excluye un apunte de la web generada y del buscador; no lo oculta en un repositorio público. Guarda datos privados fuera del repositorio o en la carpeta ignorada `private/`.
 
-`draft: true` no vuelve privado un archivo que subas a un repositorio público. Guarda notas privadas fuera del repositorio; puedes usar la carpeta ignorada `private/`. La web no incluye un área privada autenticada. No publiques evidencias reales, datos personales ni material de cursos copiado; usa apuntes originales y referencias.
+## Arquitectura y archivos
 
-## Arquitectura
+Astro estático + TypeScript + Markdown + CSS propio. No requiere servidor de aplicación, cuentas ni una base de datos. El servidor local de Astro permite trabajar y ver cambios.
 
-```text
-Markdown + imágenes + datos del roadmap
-                 |
-           Astro + TypeScript
-                 |
-       HTML / CSS / JavaScript estáticos
-                 |
-     Navegador o GitHub Pages
-          |              |
-  búsqueda local     progreso local
-```
+| Archivo o carpeta | Función |
+| --- | --- |
+| `src/data/course.ts` | Fuente de los 17 módulos y 44 temas con objetivos e IDs estables |
+| `src/pages/roadmap.astro` | Plan de estudio y controles de la checklist |
+| `src/scripts/roadmap.ts` | Persistencia y respaldos de progreso |
+| `src/lib/course-template.ts` | Plantilla de apuntes por módulo |
+| `src/scripts/editor.ts` | Editor y borradores independientes |
+| `src/content/notes/` | Apuntes del diario |
+| `src/assets/` | Imágenes |
+| `AGENTS.md` | Convenciones para trabajar con Codex |
 
-Astro genera las páginas al construir el proyecto. El buscador descarga un índice estático y filtra en tu navegador. No hay servidor de aplicación, cuentas ni base de datos en esta versión. CSS propio evita añadir otra herramienta que mantener.
+Los archivos antiguos de otras áreas permanecen en el proyecto para no perder trabajo, pero sus entradas no se publican ni aparecen en la navegación. El plan de estudio usa únicamente los módulos de Cisco.
 
-```text
-src/
-  content/notes/       Apuntes diarios en Markdown
-  content/labs/        Laboratorios en Markdown
-  assets/             Imágenes que Astro procesa
-  data/roadmap.ts      Etapas e IDs estables de habilidades
-  pages/              Páginas y rutas
-  layouts/            Estructura y lectura de artículos
-  components/         Elementos compartidos
-  scripts/            Editor, búsqueda y checklist del navegador
-  lib/                Lógica reutilizable
-  styles/             Diseño
-templates/            Plantillas para escribir desde VS Code
-docs/PLAN.md          Decisiones, fases e integración futura de IA
-tests/                Pruebas de datos y búsqueda
-```
-
-Para trabajar con Codex: abre esta carpeta como proyecto y pide un cambio pequeño y concreto, por ejemplo: «Añade un campo opcional de duración a los laboratorios y muéstralo en la página». `AGENTS.md` describe las convenciones.
-
-## Verificar antes de publicar
+## Comprobar cambios
 
 ```powershell
 npm.cmd run verify
 ```
 
-Esto comprueba tipos, pruebas, compilación y enlaces del resultado. También revisa que no se publique el borrador de ejemplo.
-
-Para probar la ruta de un repositorio de GitHub Pages:
+Incluye comprobación de tipos, pruebas de datos, búsqueda y plantillas, compilación y revisión de enlaces e imágenes. Para comprobar un prefijo de publicación:
 
 ```powershell
 $env:SITE_BASE = '/walters-digital-lab/'
@@ -126,47 +85,10 @@ Remove-Item Env:SITE_BASE
 npm.cmd run build
 ```
 
-`npm.cmd run preview` muestra el último resultado de producción. Los workflows se incluyen preparados; su ejecución remota solo se podrá verificar después de subir el repositorio.
+## Próximos pasos
 
-## Conectar GitHub y publicar cuando estés listo
+- Utilizar el módulo 1 y ajustar el flujo según la experiencia real.
+- Elegir proveedor local o remoto antes de conectar la IA: extraer objetivos desde una foto, resumir apuntes y proponer diagramas editables. Estas funciones todavía no están activas.
+- Publicar en GitHub Pages cuando Walter lo pida. Se conserva el workflow manual de publicación; no se ha ejecutado. No se necesita comprar un dominio para usar localhost.
 
-1. En GitHub crea un repositorio vacío, sin inicializar README ni `.gitignore`. Puedes mantenerlo privado mientras preparas tus notas.
-2. En VS Code abre Control de código fuente y confirma los archivos. También puedes usar estos comandos si aún no existe un commit:
-
-```powershell
-git add .
-git commit -m "Crear primera versión de Walter's Digital Lab"
-```
-
-3. Copia la URL real del repositorio. Sustituye el valor del ejemplo antes de ejecutar:
-
-```powershell
-git remote add origin https://github.com/TU-USUARIO/TU-REPOSITORIO.git
-git push -u origin main
-```
-
-Si Git pide nombre y correo, configura tus propios datos o tu dirección privada de GitHub; el proyecto no inventa una identidad por ti.
-
-4. Para usar GitHub Pages con GitHub Free, el repositorio debe ser **público**. Revisa antes tanto los archivos como el historial. En GitHub, entra en **Settings → Pages → Source → GitHub Actions**.
-5. En **Actions**, ejecuta **Publicar en GitHub Pages → Run workflow** sobre `main`. Solo este paso inicia la publicación. Los pushes normales ejecutan las comprobaciones, sin publicar.
-6. El workflow muestra la dirección final. La configuración obtiene el usuario y el nombre del repositorio automáticamente. Para un dominio propio se necesitan ajustes adicionales; no hace falta comprar uno para empezar.
-
-El coste previsto de este MVP es **0 en servicios recurrentes** usando tu equipo y GitHub Pages dentro de sus límites. No incluye dominio propio ni IA remota. Las condiciones pueden cambiar; revisa [disponibilidad y límites de GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits).
-
-## Qué viene después
-
-1. **Uso real:** reemplazar ejemplos, añadir tus primeras entradas, probar el flujo diario y publicar si lo deseas.
-2. **Aprendizaje:** diagramas Mermaid, tarjetas de repaso y mejoras del editor basadas en tu uso.
-3. **IA contextual:** contrato de proveedor, selección explícita de contexto y respuestas con referencias. Proveedor local o servicio remoto con límites, según presupuesto y equipo.
-4. **Sincronización opcional:** cuentas y base de datos solo cuando necesitar varios dispositivos lo justifique.
-
-La web actual no llama a ninguna IA ni solicita claves. El plan técnico y los criterios de cada fase están en `docs/PLAN.md`.
-
-## Referencias técnicas
-
-- [Colecciones de contenido de Astro](https://docs.astro.build/en/guides/content-collections/)
-- [Markdown e imágenes en Astro](https://docs.astro.build/en/guides/markdown-content/)
-- [Astro en GitHub Pages](https://docs.astro.build/en/guides/deploy/github/)
-- [Planes de GitHub](https://docs.github.com/en/get-started/learning-about-github/githubs-plans)
-
-Documentación consultada el 23 de noviembre de 2026.
+La IA remota necesitaría un servicio protegido para guardar claves y controlar el gasto. No poner claves en Markdown, localStorage ni código que se entregue al navegador.

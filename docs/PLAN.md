@@ -1,3 +1,5 @@
+> Estado actual: solo redes y Cisco en localhost. Los 17 módulos y sus 44 temas ya están integrados; el editor guarda un borrador por módulo. El plan de fases de abajo es histórico y no autoriza reintroducir laboratorios, Windows, Linux o DFIR en la interfaz. IA aún pendiente de proveedor.
+
 # Plan de producto y arquitectura
 
 ## Objetivo

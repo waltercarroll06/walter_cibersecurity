@@ -9,8 +9,8 @@ async function filesAt(directory) {
 }
 const files = await filesAt(root);
 const index = JSON.parse(await readFile(join(root, 'search-index.json'), 'utf8'));
-assert(index.length >= 3, 'Falta contenido de ejemplo en el índice.');
-assert(index.some(entry => entry.type === 'Laboratorio'), 'El buscador debe incluir laboratorios.');
+assert(index.length >= 1, 'Falta contenido de ejemplo en el índice.');
+assert(index.every(entry => entry.category === 'Redes' && entry.type === 'Apunte'), 'Solo se publica el diario de redes.');
 for (const file of files.filter(file => /\.(html|json)$/.test(file))) {
   const text = await readFile(file, 'utf8');
   assert(!text.includes('MARCADOR_BORRADOR_NO_PUBLICAR'), `Un borrador se filtró en ${file}`);
