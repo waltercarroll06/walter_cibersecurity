@@ -1,0 +1,7 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import EntryCard from '../../components/EntryCard.astro';
+import { published, withBase } from '../../lib/content';
+const labs = await published('labs');
+---
+<Layout title="Laboratorios" active="laboratorios"><div class="page-heading"><div><p class="eyebrow">OBSERVAR · PROBAR · DOCUMENTAR</p><h1>Laboratorios</h1><p>Prácticas reproducibles para convertir conceptos en experiencia.</p></div><a class="button primary" href={`${withBase('nuevo/')}?tipo=laboratorio`}>Nuevo laboratorio</a></div><div class="callout">Trabaja con tus propios equipos, archivos de prueba o entornos donde tengas autorización. Antes de publicar capturas, revisa nombres, direcciones y otros datos personales.</div><div class="cards-grid">{labs.map(entry => <EntryCard entry={entry} />)}</div></Layout>

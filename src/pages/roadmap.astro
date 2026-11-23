@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { roadmap } from '../data/roadmap';
+const total = roadmap.reduce((count, stage) => count + stage.tasks.length, 0);
+---
+<Layout title="Mi roadmap" active="roadmap"><div class="page-heading"><div><p class="eyebrow">UNA HABILIDAD A LA VEZ</p><h1>Mi camino hacia DFIR</h1><p>Redes primero. Después Windows, Linux y las bases de investigación.</p></div><span class="tag">A tu ritmo</span></div>
+  <section class="progress-panel"><div><h2 id="progress-label">0 de {total} habilidades</h2><p>El avance se guarda en este navegador. Exporta un respaldo para llevarlo a otro equipo.</p></div><strong id="progress-percent">0%</strong><progress id="total-progress" max={total} value="0" aria-labelledby="progress-label"></progress></section>
+  <div class="roadmap-actions"><button class="button secondary" id="export-progress">Exportar respaldo</button><label class="button secondary" for="import-progress">Importar respaldo</label><input class="file-input" id="import-progress" type="file" accept="application/json,.json" /><span class="muted small">Al importar se reemplazan las marcas actuales.</span></div><p id="storage-status" class="status-message" role="status" aria-live="polite"></p>
+  <noscript><div class="callout">Activa JavaScript para guardar y marcar tu progreso.</div></noscript>
+  <div class="roadmap-stages">{roadmap.map(stage => <section class="stage" data-stage={stage.id}><header><span class="tag">{stage.category}</span><span class="stage-count mono">0 / {stage.tasks.length}</span><h2>{stage.title}</h2><p>{stage.description}</p></header><div class="task-list">{stage.tasks.map(task => <label class="task-row"><input type="checkbox" data-task={task.id} /><span><strong>{task.title}</strong><small>{task.evidence}</small></span></label>)}</div></section>)}</div>
+  <script src="../scripts/roadmap.ts"></script>
+</Layout>

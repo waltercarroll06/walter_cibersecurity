@@ -1,0 +1,12 @@
+---
+import Icon from './Icon.astro';
+import { entryUrl, formatDate, readTime, type Entry } from '../lib/content';
+interface Props { entry: Entry }
+const { entry } = Astro.props;
+---
+<article class="entry-card">
+  <div class="entry-top"><span class:list={['tag', entry.data.category.toLowerCase()]}>{entry.data.category}</span><span class="muted small">{readTime(entry.body)} min de lectura</span></div>
+  <h3><a href={entryUrl(entry)}>{entry.data.title}</a></h3>
+  <p>{entry.data.description}</p>
+  <div class="entry-footer"><time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time><span>{entry.data.example ? 'Ejemplo editable' : <Icon name="book" size={17} />}</span></div>
+</article>

@@ -1,0 +1,47 @@
+---
+import '../styles/global.css';
+import Icon from '../components/Icon.astro';
+import { withBase } from '../lib/content';
+interface Props { title: string; description?: string; active?: string; pageTitle?: string }
+const { title, description = 'Mi cuaderno de redes, sistemas y análisis forense digital.', active = 'inicio', pageTitle = title } = Astro.props;
+const navigation = [ ['inicio', '', 'Inicio', 'home'], ['diario', 'diario/', 'Diario de estudio', 'book'], ['roadmap', 'roadmap/', 'Mi roadmap', 'route'], ['laboratorios', 'laboratorios/', 'Laboratorios', 'flask'], ['herramientas', 'herramientas/', 'Herramientas', 'tools'] ];
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#111617" />
+    <link rel="icon" href={withBase('favicon.svg')} type="image/svg+xml" />
+    <title>{pageTitle} · Walter's Digital Lab</title>
+    <script is:inline>try { document.documentElement.dataset.theme = localStorage.getItem('wdl:theme') || 'dark'; } catch { document.documentElement.dataset.theme = 'dark'; }</script>
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <aside class="sidebar">
+      <a class="brand" href={withBase()} aria-label="Walter's Digital Lab, inicio"><span class="brand-symbol">w<span>.</span></span><span>Walter’s<span class="brand-subtitle">DIGITAL LAB</span></span></a>
+      <p class="nav-label">MI ESPACIO</p>
+      <nav aria-label="Navegación principal">
+        {navigation.map(([key, path, label, icon]) => <a href={withBase(path)} class:list={['nav-link', { active: active === key }]} aria-current={active === key ? 'page' : undefined}><Icon name={icon} /><span>{label}</span></a>)}
+      </nav>
+      <div class="sidebar-bottom"><div class="mini-terminal"><span class="mono">~/walter/lab</span><p>Un concepto.<br />Una práctica.<br />Un paso más.</p></div><div class="profile"><span class="avatar">W</span><span>Walter<small>Aprendiendo en público</small></span></div></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar"><span class="breadcrumb">Mi laboratorio <span>/</span> <strong>{title}</strong></span><div class="top-actions"><a class="search-shortcut" href={withBase('buscar/')} aria-label="Buscar apuntes"><Icon name="search" /><span>Buscar en el lab</span></a><button class="icon-button" id="theme-toggle" aria-label="Cambiar tema" title="Cambiar tema"><Icon name="sun" /></button></div></header>
+      <main id="contenido"><slot /></main>
+      <footer class="footer"><span>Walter’s Digital Lab <span class="muted">· Aprender. Investigar. Documentar.</span></span><span class="mono">Hecho para seguir aprendiendo.</span></footer>
+    </div>
+    <script>
+      const toggle = document.querySelector<HTMLButtonElement>('#theme-toggle');
+      function updateThemeLabel() { toggle?.setAttribute('aria-label', document.documentElement.dataset.theme === 'light' ? 'Activar tema oscuro' : 'Activar tema claro'); }
+      updateThemeLabel();
+      toggle?.addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = next;
+        try { localStorage.setItem('wdl:theme', next); } catch { /* Theme still works for this page. */ }
+        updateThemeLabel();
+      });
+    </script>
+  </body>
+</html>
