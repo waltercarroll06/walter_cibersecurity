@@ -1,6 +1,6 @@
-# Walter’s Digital Lab · Mi curso de redes
+# Walter’s Digital Lab
 
-Cuaderno personal de Walter para **Conceptos básicos de redes v2.0 de Cisco Networking Academy**. El alcance actual es solo redes, en localhost, con tutor IA local opcional. La web no está publicada.
+Cuaderno personal de Walter para **Conceptos básicos de redes v2.0 de Cisco Networking Academy** y sus sesiones de Linux. La web funciona en localhost, con un tutor IA local opcional para redes.
 
 ## Abrir en Windows
 
@@ -34,7 +34,7 @@ El progreso de este curso utiliza una clave distinta del antiguo roadmap general
 4. Cambia de módulo con el selector: cada módulo tiene un borrador independiente. También existe **Apunte libre de redes**, que conserva el borrador general anterior.
 5. Usa **Descargar Markdown** para conservar una copia fuera del navegador.
 
-Los borradores se guardan al escribir. No sobrescribimos un borrador existente con la plantilla. Los apuntes no aparecen automáticamente en el diario: para añadirlos, guarda el Markdown en `src/content/notes/` y cambia `draft: true` a `draft: false` cuando quieras mostrarlo. El contenido publicado se limita actualmente a Redes.
+Los borradores se guardan al escribir. No sobrescribimos un borrador existente con la plantilla. Los apuntes no aparecen automáticamente en el diario: para añadirlos, guarda el Markdown en `src/content/notes/` y cambia `draft: true` a `draft: false` cuando quieras mostrarlo. Esta colección de Markdown está dedicada a Redes.
 
 ### Imágenes
 
@@ -45,6 +45,12 @@ Coloca capturas en `src/assets/` e inclúyelas en un apunte con:
 ```
 
 Las imágenes del proyecto se muestran cuando el archivo está incorporado al proyecto. El editor muestra una indicación para imágenes locales; admite imágenes HTTPS en su vista previa. Revisa que las capturas no contengan datos personales antes de publicarlas.
+
+## Bitácora de Linux
+
+En Windows también puedes hacer doble clic en `Abrir-Linux.cmd` desde la carpeta del proyecto para iniciar el laboratorio y abrir la bitácora directamente.
+
+En **Linux**, elige el número de día y pulsa **Abrir día**. Al escribir apuntes, el día aparece en la lista y puedes volver a abrirlo para continuar. Cada día tiene sus propios apuntes, guardados en ese navegador. Usa **Descargar Markdown** para guardar una copia del día en tu equipo.
 
 ## Tutor IA local
 
@@ -93,7 +99,7 @@ Astro estático + TypeScript + Markdown + CSS propio. No requiere cuentas ni una
 | `src/assets/` | Imágenes |
 | `AGENTS.md` | Convenciones para trabajar con Codex |
 
-Los archivos antiguos de otras áreas permanecen en el proyecto para no perder trabajo, pero sus entradas no se publican ni aparecen en la navegación. El plan de estudio usa únicamente los módulos de Cisco.
+Los archivos Markdown antiguos de otras áreas se conservan fuera del diario. El plan de estudio usa únicamente los módulos de Cisco y la bitácora de Linux guarda sus días en el navegador.
 
 ## Comprobar cambios
 

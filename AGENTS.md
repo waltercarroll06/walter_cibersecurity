@@ -1,10 +1,10 @@
-> Alcance actual: solo redes y apuntes de Cisco, en localhost. Checklist con 17 módulos y 44 temas. Tutor local con Ollama y gemma3:12b para extraer objetivos y resumir apuntes. Diagramas pendientes.
+> Alcance actual: redes y apuntes de Cisco, más una bitácora local de Linux por día de estudio. Checklist de Cisco con 17 módulos y 44 temas. Tutor local con Ollama y gemma3:12b para extraer objetivos y resumir apuntes. Diagramas pendientes.
 
 # Walter's Digital Lab — guía para Codex
 
 ## Propósito
 
-Blog y cuaderno personal de Walter centrado actualmente en redes y Cisco. La prioridad es ayudarle a estudiar y documentar; mantener una web pequeña, comprensible y extensible. Interfaz y documentación en español.
+Blog y cuaderno personal de Walter para redes, Cisco y Linux. La prioridad es ayudarle a estudiar y documentar; mantener una web pequeña, comprensible y extensible. Interfaz y documentación en español.
 
 ## Arquitectura y límites
 
