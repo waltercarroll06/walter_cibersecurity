@@ -13,7 +13,7 @@ npm.cmd run dev
 
 El comando abre la portada en el navegador y muestra la dirección local en la terminal (normalmente http://127.0.0.1:4321/). La terminal mantiene activo el servidor local. Al cerrarla se detiene la vista previa, pero tus archivos permanecen. Reinicia el comando para volver a verla.
 
-La ruta principal abre la portada. Pulsa el computador o selecciona **Entrar al laboratorio** para acceder al inicio. También puedes abrir `/inicio/` directamente.
+La ruta principal abre la portada. Pulsa el computador o selecciónalo con Tab y Enter para acceder al inicio. También puedes abrir `/inicio/` directamente.
 
 ## Plan de estudio
 
@@ -56,4 +56,4 @@ Las imágenes del proyecto se muestran cuando el archivo está incorporado al pr
 
 El diario toma texto escrito en los borradores de Cisco, los días de Linux y los apuntes publicados por el autor. Descarta las líneas de plantilla y los ejemplos del proyecto. Al usar la app local guarda una muestra de hasta 60 apuntes (los últimos 1.600 caracteres útiles de cada uno) en `private/perfil-estudio.json`. La tarea de las 08:00 de Bogotá usa esa muestra para investigar un tema ya estudiado y estimar el nivel según una cita concreta. En el diario puedes leer esa cita y el nivel sugerido. Si faltan apuntes, el diario espera. Los guardados anteriores siguen disponibles en ese navegador.
 
-Con Ollama e Internet, el servidor local también puede seleccionar un concepto del apunte con Gemma, buscarlo en Wikipedia en español y adaptar la explicación. Solo el término de búsqueda técnico se usa en la consulta web. El archivo de perfil se guarda localmente, está excluido de Git y bloqueado como recurso web. La edición personalizada requiere el servidor de desarrollo.
+**Actualizar** vuelve a revisar tus apuntes con Gemma y busca publicaciones de los últimos 90 días en Cisco Blogs, Ars Technica y TechCrunch. El diario muestra la fuente y su fecha. Dispones de una recarga manual por edición, que se renueva a las 08:00 de Bogotá. Guardar, abrir la página o recibir la edición automática conserva el cupo. Los intentos sin una lectura pertinente también lo conservan. Solo se envía a los buscadores el término técnico. La edición personalizada requiere el servidor local, Ollama e Internet.

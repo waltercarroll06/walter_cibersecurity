@@ -1,3 +1,4 @@
+import { syncStudyNotes } from './study-sync';
 import { validReading, editionDate, type Reading, type PersonalReading } from '../lib/daily-reading';
 const panel = document.querySelector<HTMLElement>('#daily')!;
 const current = panel.querySelector<HTMLElement>('#daily-article')!;
@@ -55,27 +56,50 @@ function restore() {
   } catch { status.textContent = 'No se puede leer el almacenamiento de este navegador.'; }
   render();
 }
-async function update() {
-  const id=profileId();
-  if(active && active.profileId!==id){active=undefined;render();}
-  if(panel.dataset.dev!=='true'){status.textContent='Abre el laboratorio local para preparar lecturas con tus apuntes.';return;}
-  if(!id || id==='error'){status.textContent=id==='error'?'No se pudieron sincronizar tus apuntes con el laboratorio local.':'Comprobando tus apuntes…';return;}
-  if(refresh.disabled) return;
-  refresh.disabled=true;
+let loading=false;
+let usedEdition='';
+let empty=false;
+let failedMessage='';
+function refreshState(){
+  refresh.disabled=loading || empty || usedEdition===editionDate(new Date()) || panel.dataset.dev!=='true' || !profileId() || profileId()==='error';
+}
+async function update(manual=false) {
+  if(loading)return;
+  if(panel.dataset.dev!=='true'){refreshState();status.textContent='Abre el laboratorio local para buscar novedades con tus apuntes.';return;}
+  loading=true;refreshState();
+  let id=profileId();
   try {
-    const res=await fetch('/__daily-reading?profile='+encodeURIComponent(id),{cache:'no-store'});
+    if(manual){
+      status.textContent='Revisando tus apuntes y buscando novedades…';
+      await syncStudyNotes(true);
+      id=profileId();
+    }
+    if(!id || id==='error'){status.textContent=id==='error'?'No se pudieron sincronizar tus apuntes.':'Comprobando tus apuntes…';return;}
+    const response=await fetch('/__daily-reading?profile='+encodeURIComponent(id),manual
+      ? {method:'POST',headers:{'X-Walter-Lab':'local'},cache:'no-store'}
+      : {cache:'no-store'});
+    const result=await response.json();
     if(id!==profileId())return;
-    if(!res.ok)throw new Error();
-    const item=await res.json();
-    if(item.state==='empty'){active=undefined;render();status.textContent='Escribe tu primer apunte con tus propias palabras. A partir de él te recomendaremos una lectura.';return;}
-    if(item.state==='pending'){status.textContent='Aún no hay una lectura verificada para estos apuntes. El laboratorio necesita Ollama e Internet para prepararla.';return;}
-    if(!validReading(item) || (item as PersonalReading).profileId!==id || item.date>editionDate(new Date()))throw new Error();
-    active=item as PersonalReading;
+    if(!response.ok)throw new Error(result.error || 'No se pudo consultar el diario.');
+    empty=result.empty===true;
+    usedEdition=result.used ? result.edition : '';
+    if(validReading(result.item) && result.item.date<=editionDate(new Date())){
+      active=result.item as PersonalReading;
+      try{localStorage.setItem(prefix+'current',JSON.stringify(active));}catch{/* Reading stays visible. */}
+    }
     render();
-    try{localStorage.setItem(prefix+'current',JSON.stringify(item));}catch{/* Display remains available. */}
-    status.textContent=active.date<editionDate(new Date())?'Última lectura disponible para tus apuntes.':'Edición de las 8:00 a. m. de Colombia.';
-  } catch { status.textContent = active ? 'La actualización está pendiente. Puedes leer o guardar la edición visible.' : 'No se pudo cargar la lectura. Vuelve a intentar.'; }
-  finally { refresh.disabled = false; if(id!==profileId()) void update(); }
+    if(result.used || manual)failedMessage='';
+    status.textContent=result.used?'Ya usaste tu recarga. Tendrás otra a las 8:00 a. m. de Colombia.'
+      :empty?'Escribe un apunte con tus propias palabras para buscar una lectura relacionada.'
+      :failedMessage || 'Tienes una recarga disponible.';
+  }catch(error){
+    const message=error instanceof Error?error.message:'No se pudo actualizar el diario.';
+    if(manual)failedMessage=message;
+    status.textContent=message;
+  }finally{
+    loading=false;refreshState();
+    if(id!==profileId())void update();
+  }
 }
 save.addEventListener('click', () => {
   if (!active) return;
@@ -84,7 +108,7 @@ save.addEventListener('click', () => {
     saved.set(identity(active),active); render(); status.textContent = 'Lectura guardada en este navegador.';
   } catch { status.textContent = 'El navegador no pudo guardar la lectura.'; }
 });
-refresh.addEventListener('click',update);
+refresh.addEventListener('click',()=>void update(true));
 window.addEventListener('storage', event => { if (event.key?.startsWith(prefix)) restore(); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) void update(); });
 setInterval(() => { if (!document.hidden) void update(); },60_000);

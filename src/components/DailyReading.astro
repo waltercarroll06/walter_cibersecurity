@@ -1,7 +1,8 @@
 <section class="entry-card reading-panel" id="daily" data-dev={String(import.meta.env.DEV)}>
   <div class="section-heading"><h2>Lectura del día</h2><small id="daily-date"></small></div>
+  <p id="daily-limit">Pulsa Actualizar para que la IA revise tus apuntes y busque novedades sobre lo que has estudiado. Tienes una recarga al día. Se renueva a las 8:00 a. m. de Colombia.</p>
   <article id="daily-article" hidden></article>
-  <div class="button-row"><button id="daily-save" class="button primary" type="button" disabled>Guardar lectura</button><button id="daily-refresh" class="button secondary" type="button">Actualizar</button></div>
+  <div class="button-row"><button id="daily-save" class="button primary" type="button" disabled>Guardar lectura</button><button id="daily-refresh" aria-describedby="daily-limit daily-state" disabled class="button secondary" type="button">Actualizar</button></div>
   <p id="daily-state" role="status"></p>
   <details><summary>Lecturas guardadas (<span id="saved-count">0</span>)</summary><div id="daily-archive"></div></details>
 </section>
