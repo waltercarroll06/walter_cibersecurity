@@ -10,7 +10,7 @@ if not errorlevel 1 (
 if not exist "node_modules\astro\bin\astro.mjs" (
   call npm.cmd ci || goto error
 )
-call npm.cmd run dev -- --ignore-lock --open /linux/
+call npm.cmd run dev -- --open /linux/
 if errorlevel 1 goto error
 exit /b 0
 

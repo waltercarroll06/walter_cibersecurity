@@ -1,0 +1,5 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { withBase } from '../../lib/content';
+---
+<Layout title="Inicio"><section class="hero-copy"><p class="eyebrow">MI LEARNING JOURNEY · REDES</p><h1>Un módulo al día.<br /><span>Aprender y tomar apuntes.</span></h1><p class="hero-description">Mis apuntes de Cisco por módulo y mis prácticas de Linux por día de estudio.</p><div class="button-row"><a class="button primary" href={withBase('nuevo/')}>Escribir mis apuntes</a><a class="button secondary" href={withBase('roadmap/')}>Mi plan de estudio</a><a class="button secondary" href={withBase('linux/')}>Abrir bitácora de Linux</a></div></section></Layout>

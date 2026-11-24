@@ -11,7 +11,9 @@ npm.cmd ci
 npm.cmd run dev
 ```
 
-Abre la dirección que muestra la terminal, normalmente http://127.0.0.1:4321/. La terminal mantiene activo el servidor local. Al cerrarla se detiene la vista previa, pero tus archivos permanecen. Reinicia el comando para volver a verla.
+El comando abre la portada en el navegador y muestra la dirección local en la terminal (normalmente http://127.0.0.1:4321/). La terminal mantiene activo el servidor local. Al cerrarla se detiene la vista previa, pero tus archivos permanecen. Reinicia el comando para volver a verla.
+
+La ruta principal abre la portada. Pulsa el computador o selecciona **Entrar al laboratorio** para acceder al inicio. También puedes abrir `/inicio/` directamente.
 
 ## Plan de estudio
 

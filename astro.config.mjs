@@ -7,6 +7,7 @@ const [owner, repository] = (process.env.GITHUB_REPOSITORY ?? '').split('/');
 const base = process.env.SITE_BASE ?? (repository && repository !== `${owner}.github.io` ? `/${repository}/` : '/');
 export default defineConfig({
   output: 'static',
+  server: { open: true },
   site: process.env.SITE_URL || (owner ? `https://${owner}.github.io` : undefined),
   base,
   trailingSlash: 'always',

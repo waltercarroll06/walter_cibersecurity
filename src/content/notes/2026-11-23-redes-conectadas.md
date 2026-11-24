@@ -4,7 +4,7 @@ description: "Una primera forma de entender los dispositivos, las conexiones y e
 date: 2026-11-23
 category: Redes
 tags: [cisco, fundamentos, LAN]
-draft: false
+draft: true
 example: true
 source: "Cisco Networking Academy · Conceptos básicos de redes. Plantilla de apuntes originales, no material oficial."
 ---
