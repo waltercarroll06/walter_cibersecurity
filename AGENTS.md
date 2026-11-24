@@ -1,4 +1,4 @@
-> Alcance actual: redes y apuntes de Cisco, más una bitácora local de Linux por día de estudio. Checklist de Cisco con 17 módulos y 44 temas. Tutor local con Ollama y gemma3:12b para extraer objetivos y resumir apuntes. Diagramas pendientes.
+> Alcance actual: redes y apuntes de Cisco, más una bitácora local de Linux por día de estudio. Checklist de Cisco con 17 módulos y 44 temas. Tutor local con Ollama y gemma3:12b para extraer objetivos y resumir apuntes. El tutor de Linux explica comandos y resume el día con el mismo modelo. El diario ofrece lecturas de fuentes públicas a las 08:00 de Bogotá, con guardados por navegador. Herramientas incluye un catálogo defensivo y casos forenses documentados.
 
 # Walter's Digital Lab — guía para Codex
 

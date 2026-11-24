@@ -64,6 +64,7 @@ function openDay(day: number) {
   editor.hidden = false;
   status.textContent = `Día ${day} abierto.`;
   renderDays();
+  document.dispatchEvent(new Event('linux-day-opened'));
   body.focus();
 }
 

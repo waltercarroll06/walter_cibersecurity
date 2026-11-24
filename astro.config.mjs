@@ -1,4 +1,5 @@
 import { defineConfig } from 'astro/config';
+import { dailyReader } from './src/server/daily-reading.ts';
 import { localTutor } from './src/server/local-ai.ts';
 
 // GitHub Actions supplies the repository name; local development stays at /.
@@ -10,6 +11,6 @@ export default defineConfig({
   base,
   trailingSlash: 'always',
   devToolbar: { enabled: false },
-  vite: { plugins: [localTutor()] },
+  vite: { plugins: [localTutor(), dailyReader()] },
   markdown: { shikiConfig: { theme: 'github-dark' } },
 });

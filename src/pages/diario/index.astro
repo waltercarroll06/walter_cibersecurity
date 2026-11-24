@@ -1,7 +1,10 @@
 ---
+import DailyReading from '../../components/DailyReading.astro';
 import Layout from '../../layouts/Layout.astro';
 import EntryCard from '../../components/EntryCard.astro';
 import { published, withBase } from '../../lib/content';
 const notes = await published('notes');
 ---
-<Layout title="Diario de estudio" active="diario"><div class="page-heading"><div><p class="eyebrow">APRENDER Y DEJAR HUELLA</p><h1>Diario de estudio</h1><p>Ideas, comandos, dudas y pequeñas conexiones de cada sesión.</p></div><a class="button primary" href={withBase('nuevo/')}>Nuevo apunte</a></div><div class="filter-links" aria-label="Buscar por categoría">{['Redes'].map(category => <a class="tag" href={`${withBase('buscar/')}?categoria=${category}`}>{category}</a>)}</div><div class="cards-grid">{notes.map(entry => <EntryCard entry={entry} />)}</div></Layout>
+<Layout title="Diario de estudio" active="diario"><div class="page-heading"><div><p class="eyebrow">APRENDER Y DEJAR HUELLA</p><h1>Diario de estudio</h1><p>Ideas, comandos, dudas y pequeñas conexiones de cada sesión.</p></div><a class="button primary" href={withBase('nuevo/')}>Nuevo apunte</a></div><DailyReading /><h2 class="notes-heading">Mis apuntes de redes</h2><div class="filter-links" aria-label="Buscar por categoría">{['Redes'].map(category => <a class="tag" href={`${withBase('buscar/')}?categoria=${category}`}>{category}</a>)}</div><div class="cards-grid">{notes.map(entry => <EntryCard entry={entry} />)}</div></Layout>
+
+<style>.notes-heading{margin-bottom:1rem}</style>

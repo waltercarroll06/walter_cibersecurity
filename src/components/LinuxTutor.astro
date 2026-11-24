@@ -1,0 +1,13 @@
+<section id="linux-tutor" class="entry-card" data-dev={String(import.meta.env.DEV)}>
+  <h2>Tutor de Linux</h2>
+  <div class="button-row"><span class="tag">Gemma 3 · 12B</span><button id="linux-connect" type="button" class="button secondary">Comprobar conexión</button></div>
+  <p id="linux-connection" role="status"></p>
+  <h3>Resumen del día</h3><p>Abre un día y pide un resumen de los apuntes que tienes en pantalla.</p>
+  <div><button id="linux-summary" class="button secondary" type="button" disabled>Resumir mis apuntes</button></div>
+  <h3>Explicación de comando</h3>
+  <div><label for="linux-command">Comando o pregunta sobre un comando</label><textarea id="linux-command" rows="3" maxlength="4000" placeholder="Por ejemplo, ¿qué muestra ls -lh /var/log?"></textarea></div>
+  <div class="button-row"><button id="linux-explain" class="button primary" type="button" disabled>Explicar comando</button><button id="linux-cancel" class="button secondary" type="button" hidden>Cancelar consulta</button></div>
+  <p id="linux-ai-status" role="status"></p><div id="linux-answer" hidden><h3 id="linux-answer-title"></h3><p id="linux-answer-text"></p></div>
+</section>
+<style>#linux-tutor{margin-top:2rem}#linux-answer{border-top:1px solid var(--line);padding-top:1rem}#linux-answer-text{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text);margin-top:.7rem}button:disabled{opacity:.55;cursor:default}</style>
+<script src="../scripts/linux-tutor.ts"></script>

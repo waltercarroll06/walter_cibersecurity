@@ -46,11 +46,21 @@ Coloca capturas en `src/assets/` e inclúyelas en un apunte con:
 
 Las imágenes del proyecto se muestran cuando el archivo está incorporado al proyecto. El editor muestra una indicación para imágenes locales; admite imágenes HTTPS en su vista previa. Revisa que las capturas no contengan datos personales antes de publicarlas.
 
+## Herramientas y lectura del día
+
+**Herramientas** reúne fichas de redes y defensa, un apartado de forensia digital y dos casos reales con esquemas explicativos y enlaces a sus informes originales.
+
+**Diario de estudio** muestra una lectura con fuente y práctica. La edición cambia desde las **08:00 de Bogotá** cuando hay material nuevo. **Guardar lectura** conserva una copia en ese navegador; una lectura sin guardar deja su lugar a la siguiente. El diario conserva la última edición válida si falla una consulta.
+
+La tarea programada investiga en la web y escribe la edición en `private/lectura-del-dia.json` en la copia configurada. Con el servidor de desarrollo activo, si falta la edición, la app consulta notas de versión públicas de proyectos de Linux, redes y DFIR y usa Gemma para explicarlas. Esta alternativa necesita Internet y Ollama; comprueba la fecha al iniciar y cada minuto. Los apuntes y comandos personales solo se envían a Ollama local. La versión estática muestra la edición incluida en la compilación. Los guardados corresponden a un navegador, dirección y puerto.
+
 ## Bitácora de Linux
 
 En Windows también puedes hacer doble clic en `Abrir-Linux.cmd` desde la carpeta del proyecto para iniciar el laboratorio y abrir la bitácora directamente.
 
 En **Linux**, elige el número de día y pulsa **Abrir día**. Al escribir apuntes, el día aparece en la lista y puedes volver a abrirlo para continuar. Cada día tiene sus propios apuntes, guardados en ese navegador. Usa **Descargar Markdown** para guardar una copia del día en tu equipo.
+
+En **Tutor de Linux** comprueba la conexión a `gemma3:12b`. Puedes resumir el día abierto y pegar un comando o hacer una pregunta en **Explicación de comando**. La consulta funciona como texto y la respuesta aparece debajo de los botones.
 
 ## Tutor IA local
 
