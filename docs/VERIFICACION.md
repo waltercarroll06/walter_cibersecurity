@@ -1,4 +1,14 @@
-# Actualización: plan de Cisco
+# Actualización: tutor IA local
+
+23 de noviembre de 2026. Integración de desarrollo con Ollama y gemma3:4b: captura de objetivos y resumen del editor, revisión de la respuesta y adición al final de las notas.
+
+- Comprobación de tipos sin errores, advertencias ni sugerencias; 11 pruebas aprobadas.
+- Build y enlaces válidos tanto en `/` como en `/walters-digital-lab/`; sigue siendo una web estática de 9 páginas.
+- Pruebas del servidor: límites de texto e imágenes, firmas de archivo, rechazo de rutas/URLs, acciones permitidas y origen local. Petición HTTP con origen externo rechazada con 403 en el servidor real.
+- Navegador: mensajes de Ollama cerrado y modelo pendiente; selección de una captura PNG. Diseño revisado a 390 px y tamaño de escritorio.
+- Versión estática revisada en navegador: informa que el tutor requiere el servidor de desarrollo y mantiene desactivadas las consultas.
+
+## Actualización: plan de Cisco
 
 23 de noviembre de 2026. Se incorporaron 17 módulos y 44 temas a partir de las capturas de Walter, sin exámenes ni encuestas. La imagen repetida del módulo 6 se deduplicó.
 

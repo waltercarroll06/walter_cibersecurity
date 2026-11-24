@@ -1,4 +1,5 @@
 import { defineConfig } from 'astro/config';
+import { localTutor } from './src/server/local-ai.ts';
 
 // GitHub Actions supplies the repository name; local development stays at /.
 const [owner, repository] = (process.env.GITHUB_REPOSITORY ?? '').split('/');
@@ -9,5 +10,6 @@ export default defineConfig({
   base,
   trailingSlash: 'always',
   devToolbar: { enabled: false },
+  vite: { plugins: [localTutor()] },
   markdown: { shikiConfig: { theme: 'github-dark' } },
 });

@@ -1,4 +1,4 @@
-> Alcance actual: solo redes y apuntes de Cisco, en localhost. Laboratorios y otras áreas retirados de la navegación y del contenido publicado. Checklist de Cisco configurada con 17 módulos y 44 temas. IA aún no conectada. Las descripciones anteriores de funciones futuras se conservan como referencia.
+> Alcance actual: solo redes y apuntes de Cisco, en localhost. Checklist con 17 módulos y 44 temas. Tutor local con Ollama y gemma3:12b para extraer objetivos y resumir apuntes. Diagramas pendientes.
 
 # Walter's Digital Lab — guía para Codex
 
@@ -10,7 +10,7 @@ Blog y cuaderno personal de Walter centrado actualmente en redes y Cisco. La pri
 
 - Astro estático, TypeScript estricto y CSS propio. Usa Markdown en `src/content/notes` y `src/content/labs`.
 - No añadir React, otra capa de estilos, cuentas, base de datos o servicios de pago sin una necesidad concreta aceptada por el usuario.
-- Las funciones de IA y Mermaid están planeadas, no implementadas. No presentar botones simulados como funciones activas.
+- La IA funciona solo en desarrollo: middleware de Vite hacia Ollama en 127.0.0.1:11434. Mantener validación de origen, límites y modelo local fijo; no exponer a la LAN. Mermaid y generación de imágenes aún no están implementados. No presentar botones simulados como funciones activas.
 - `draft: true` queda fuera del HTML y del índice de búsqueda; NO es una protección de privacidad para archivos de un repositorio público.
 - No incorporar apuntes privados, secretos, credenciales o evidencias reales. `private/` está ignorado por Git y fuera de los loaders.
 - Progreso y borradores se guardan solo en el navegador. Cualquier sincronización futura requiere una migración explícita del formato versionado.
@@ -49,3 +49,4 @@ Explica en español qué cambió, cómo se verificó y qué queda pendiente. Act
 - Conservar IDs `cisco-nb2-*` y las claves de almacenamiento por curso y módulo. No sobrescribir borradores previos al aplicar plantillas.
 - Los porcentajes de las capturas no se importan como avance personal.
 - No añadir otros cursos o áreas a la interfaz sin petición del usuario.
+- El tutor solo recibe el texto o imagen elegidos. La respuesta se revisa antes de añadirla; nunca reemplazar automáticamente los apuntes. No enviar otros borradores ni introducir servicios remotos sin solicitud del usuario.

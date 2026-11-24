@@ -1,4 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { withBase } from '../lib/content';
 ---
-<Layout title="Asistente de estudio" active="herramientas"><div class="page-heading"><div><p class="eyebrow">PRÓXIMA AMPLIACIÓN</p><h1>IA para mis apuntes</h1><p>Estas funciones todavía no están conectadas a un modelo.</p></div></div><div class="cards-grid"><section class="entry-card"><h2>Foto de los objetivos</h2><p>Adjuntar una captura, extraer los objetivos y revisar el texto antes de añadirlo al módulo con una descripción breve.</p></section><section class="entry-card"><h2>Resumen del módulo</h2><p>Leer los objetivos y todos tus apuntes por submódulo para crear un resumen fácil de repasar, sin sustituir tus notas originales.</p></section><section class="entry-card"><h2>Diagramas de redes</h2><p>Representar equipos, routers y switches con diagramas editables, acompañados de una explicación.</p></section></div><div class="callout">Para activarlo falta elegir cómo ejecutar la IA: un servicio remoto con presupuesto definido o un modelo local adecuado para tu computador. No introduzcas claves en tus apuntes.</div></Layout>
+<Layout title="Asistente de estudio" active="herramientas">
+  <div class="page-heading"><div><p class="eyebrow">EN TU COMPUTADOR</p><h1>IA para mis apuntes</h1><p>Un tutor local para acompañar tu curso de redes, con Ollama y Gemma 3.</p></div><a class="button primary" href={withBase('/nuevo/')}>Abrir mis apuntes</a></div>
+  <div class="cards-grid">
+    <section class="entry-card"><h2>Foto de los objetivos</h2><p>Elige una captura en el editor. La IA extrae el título, los objetivos y una descripción breve. Puedes corregir su respuesta antes de añadirla.</p></section>
+    <section class="entry-card"><h2>Resumen del módulo</h2><p>Resume los apuntes que tienes abiertos, aclara lo que falta repasar y propone tres preguntas. Tus notas originales se conservan.</p></section>
+    <section class="entry-card"><h2>Diagramas de redes · más adelante</h2><p>Los dibujos de routers y switches quedan para una próxima ampliación. Este tutor todavía no genera imágenes.</p></section>
+  </div>
+  <div class="callout">Abre Ollama y mantén activa la web local. Encontrarás el tutor debajo del editor. Solo se consulta el texto o la captura que elijas; revisa siempre la respuesta. La IA local no está activa en la versión estática de GitHub Pages.</div>
+</Layout>
