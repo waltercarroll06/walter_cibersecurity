@@ -37,6 +37,15 @@ try {
   status.textContent = 'El almacenamiento del navegador no está disponible. Puedes descargar tus apuntes.';
 }
 
+document.addEventListener('study-draft-restored', event=>{
+  const key=(event as CustomEvent).detail;
+  if(typeof key!=='string' || !key.startsWith(keyPrefix))return;
+  const day=Number(key.slice(keyPrefix.length));
+  if(!isDay(day))return;
+  const note=JSON.parse(localStorage.getItem(key) ?? 'null');
+  if(note){notes.set(day,note);if(activeDay===day)openDay(day);else renderDays();}
+});
+
 function renderDays() {
   days.replaceChildren();
   for (const [day, note] of [...notes].sort(([first], [second]) => first - second)) {

@@ -61,7 +61,7 @@ let usedEdition='';
 let empty=false;
 let failedMessage='';
 function refreshState(){
-  refresh.disabled=loading || empty || usedEdition===editionDate(new Date()) || panel.dataset.dev!=='true' || !profileId() || profileId()==='error';
+  refresh.disabled=loading || usedEdition===editionDate(new Date()) || panel.dataset.dev!=='true';
 }
 async function update(manual=false) {
   if(loading)return;
@@ -70,11 +70,12 @@ async function update(manual=false) {
   let id=profileId();
   try {
     if(manual){
+      refresh.textContent='Buscando…';
       status.textContent='Revisando tus apuntes y buscando novedades…';
       await syncStudyNotes(true);
       id=profileId();
     }
-    if(!id || id==='error'){status.textContent=id==='error'?'No se pudieron sincronizar tus apuntes.':'Comprobando tus apuntes…';return;}
+    if(!id || id==='error'){status.textContent=id==='error'?'No se pudieron sincronizar tus apuntes. Pulsa Actualizar para volver a intentar.':'Comprobando tus apuntes…';return;}
     const response=await fetch('/__daily-reading?profile='+encodeURIComponent(id),manual
       ? {method:'POST',headers:{'X-Walter-Lab':'local'},cache:'no-store'}
       : {cache:'no-store'});
@@ -97,7 +98,7 @@ async function update(manual=false) {
     if(manual)failedMessage=message;
     status.textContent=message;
   }finally{
-    loading=false;refreshState();
+    loading=false;refresh.textContent='Actualizar';refreshState();
     if(id!==profileId())void update();
   }
 }

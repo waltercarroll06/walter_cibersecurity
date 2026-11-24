@@ -30,6 +30,7 @@ if (selectedModule) {
   description.value = selectedModule.objective;
   body.value = moduleTemplate(selectedModule);
 }
+function loadDraft(){
 try {
   const saved = JSON.parse(localStorage.getItem(key) || 'null');
   if (saved?.version === 1) {
@@ -39,6 +40,11 @@ try {
     status.textContent = 'Borrador local recuperado.';
   }
 } catch { status.textContent = 'No se pudo recuperar el borrador local.'; }
+}
+loadDraft();
+document.addEventListener('study-draft-restored', event=>{
+  if((event as CustomEvent).detail===key){loadDraft();render();}
+});
 category.value = 'Redes'; type.value = 'notes';
 function render() {
   preview.innerHTML = DOMPurify.sanitize(marked.parse(body.value, { async: false }), { USE_PROFILES: { html: true }, FORBID_TAGS: ['form','input','button','style'], FORBID_ATTR: ['style'] });

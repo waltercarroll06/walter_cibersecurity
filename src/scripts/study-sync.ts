@@ -1,12 +1,25 @@
+import { restoreDrafts } from '../lib/recovered-drafts';
 import { studyNotes } from '../lib/study-notes';
 
 const source=document.querySelector<HTMLElement>('#study-sources');
+let recovery:Promise<void>|undefined;
+async function recover(){
+  if(!recovery)recovery=(async()=>{
+    const res=await fetch('/__recovered-drafts',{headers:{'X-Walter-Lab':'local'},cache:'no-store'});
+    if(res.ok){
+      const restored=restoreDrafts(localStorage,import.meta.env.BASE_URL,await res.json());
+      for(const key of restored) document.dispatchEvent(new CustomEvent('study-draft-restored',{detail:key}));
+    } else {recovery=undefined;}
+  })().catch(()=>{recovery=undefined;});
+  return recovery;
+}
 let previous:string|undefined;
 let queue:Promise<void>=Promise.resolve();
 export function syncStudyNotes(force=false) {
   if(!source) return Promise.resolve();
   queue=queue.then(async()=>{
     try {
+      await recover();
       const notes=studyNotes(localStorage,import.meta.env.BASE_URL,JSON.parse(source.dataset.notes ?? '[]'));
       const payload=JSON.stringify(notes);
       if(payload===previous && !force)return;

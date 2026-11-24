@@ -36,7 +36,7 @@ El progreso de este curso utiliza una clave distinta del antiguo roadmap general
 4. Cambia de módulo con el selector: cada módulo tiene un borrador independiente. También existe **Apunte libre de redes**, que conserva el borrador general anterior.
 5. Usa **Descargar Markdown** para conservar una copia fuera del navegador.
 
-Los borradores se guardan al escribir. No sobrescribimos un borrador existente con la plantilla. Los apuntes no aparecen automáticamente en el diario: para añadirlos, guarda el Markdown en `src/content/notes/` y cambia `draft: true` a `draft: false` cuando quieras mostrarlo. Esta colección de Markdown está dedicada a Redes.
+Los borradores se guardan al escribir. Cada dirección local y cada puerto tiene su propio almacenamiento. Si hay copias recuperadas del módulo 1 o del día 1 de Linux en `private/recuperacion`, el laboratorio local restaura una entrada ausente o una versión más corta que coincida con el inicio del original. Conserva las ediciones distintas y mantiene las copias recuperadas fuera de Git. No sobrescribimos un borrador existente con la plantilla. Los apuntes no aparecen automáticamente en el diario: para añadirlos, guarda el Markdown en `src/content/notes/` y cambia `draft: true` a `draft: false` cuando quieras mostrarlo. Esta colección de Markdown está dedicada a Redes.
 
 ### Imágenes
 
