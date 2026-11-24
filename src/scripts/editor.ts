@@ -1,4 +1,5 @@
 import { courseModules } from '../data/course';
+import { freeTemplate } from '../lib/free-template';
 import { moduleTemplate } from '../lib/course-template';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
@@ -23,7 +24,7 @@ moduleSelector.addEventListener('change', () => {
 const now = new Date();
 date.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 type.value = 'notes';
-body.value = type.value === 'labs' ? '## Objetivo\n\n¿Qué quiero comprobar?\n\n## Entorno\n\nEquipo, sistema y archivos de práctica.\n\n## Procedimiento\n\n1. Primer paso.\n\n## Evidencias\n\nCapturas y observaciones.\n\n## Conclusiones y límites\n\n¿Qué puedo afirmar y qué falta verificar?\n' : '## Módulo del día\n\nNombre y número del módulo de Cisco.\n\n## Objetivos\n\nPega aquí los objetivos de la lección.\n\n## Descripción breve\n\nQué voy a aprender hoy.\n\n## Submódulo 1: título\n\nMis apuntes con mis propias palabras.\n\n## Submódulo 2: título\n\nMis apuntes.\n\n## Práctica\n\nComandos, observaciones y capturas.\n\n## Dudas pendientes\n\n- ¿Qué necesito repasar?\n\n## Mi próxima sesión\n\nUn paso pequeño y concreto.\n';
+body.value = type.value === 'labs' ? '## Objetivo\n\n¿Qué quiero comprobar?\n\n## Entorno\n\nEquipo, sistema y archivos de práctica.\n\n## Procedimiento\n\n1. Primer paso.\n\n## Evidencias\n\nCapturas y observaciones.\n\n## Conclusiones y límites\n\n¿Qué puedo afirmar y qué falta verificar?\n' : freeTemplate;
 if (selectedModule) {
   title.value = `Módulo ${selectedModule.number}: ${selectedModule.title}`;
   description.value = selectedModule.objective;
@@ -52,6 +53,7 @@ form.addEventListener('input', () => {
   render();
   try {
     localStorage.setItem(key, JSON.stringify({ version: 1, title: title.value, description: description.value, category: category.value, type: type.value, date: date.value, body: body.value }));
+    document.dispatchEvent(new Event('study-note-saved'));
     status.textContent = 'Borrador guardado en este navegador.';
   } catch { status.textContent = 'No se pudo guardar el borrador. Descarga el Markdown antes de salir.'; }
 });

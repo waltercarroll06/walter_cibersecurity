@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import { getCollection } from 'astro:content';
+const signedNotes = import.meta.env.DEV ? (await getCollection('notes', ({data}) => !data.example && !data.draft)).map(n => ({label:n.data.title,text:n.body ?? ''})) : [];
 import Icon from '../components/Icon.astro';
 import { withBase } from '../lib/content';
 interface Props { title: string; description?: string; active?: string; pageTitle?: string }
@@ -38,6 +40,8 @@ const navigation = [
       <main id="contenido"><slot /></main>
       <footer class="footer"><span>Walter’s Digital Lab <span class="muted">· Aprender. Investigar. Documentar.</span></span><span class="mono">Hecho para seguir aprendiendo.</span></footer>
     </div>
+    {import.meta.env.DEV && <div hidden id="study-sources" data-notes={JSON.stringify(signedNotes)}></div>}
+    <script src="../scripts/study-sync.ts"></script>
     <script>
       const toggle = document.querySelector<HTMLButtonElement>('#theme-toggle');
       function updateThemeLabel() { toggle?.setAttribute('aria-label', document.documentElement.dataset.theme === 'light' ? 'Activar tema oscuro' : 'Activar tema claro'); }

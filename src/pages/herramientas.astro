@@ -1,7 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { withBase } from '../lib/content';
-import { networkTools, forensicTools } from '../data/security-tools';
+import ToolCards from '../components/ToolCards.astro';
+import { networkTools, forensicTools, glossary } from '../data/security-tools';
 const groups = [
   { id: 'defensa', title: 'Redes y defensa', tools: networkTools,
     question: '¿Qué hizo que el servicio dejara de responder?', caseName: 'Cloudflare · 2 de julio de 2019',
@@ -17,12 +18,13 @@ const groups = [
 ---
 <Layout title="Herramientas" active="herramientas">
   <header class="page-heading"><div><h1>Herramientas de ciberseguridad</h1><p>Elige según la pregunta que intentas responder y el tipo de evidencia que tienes delante.</p></div></header>
-  <nav class="filter-links" aria-label="Secciones de herramientas">{groups.map(g => <a class="tag" href={'#'+g.id}>{g.title}</a>)}<a class="tag" href="#tutor">IA para mis apuntes</a></nav>
+  <nav class="filter-links" aria-label="Secciones de herramientas">{groups.map(g => <a class="tag" href={'#'+g.id}>{g.title}</a>)}<a class="tag" href="#glosario">Glosario</a><a class="tag" href="#tutor">IA para mis apuntes</a></nav>
   {groups.map(group => <section id={group.id} class="tool-group">
     <h2>{group.title}</h2>
-    <div class="cards-grid">{group.tools.map(tool => <article class="entry-card"><h3>{tool.name}</h3><p>{tool.use}</p><p><strong>Ejemplo.</strong> {tool.example}</p><a class="text-link" href={tool.url}>Documentación de {tool.name}</a></article>)}</div>
+    <ToolCards items={group.tools} />
     <article class="entry-card case"><div><p class="eyebrow">{group.caseName}</p><h3>{group.question}</h3><p>{group.text}</p><a class="text-link" href={group.url}>{group.source}</a></div><figure><img src={withBase(group.image)} alt={group.alt} loading="lazy" width="760" height="360"/><figcaption>Esquema basado en el informe del caso.</figcaption></figure></article>
   </section>)}
+  <section id="glosario" class="tool-group"><h2>Glosario de ciberseguridad</h2><ToolCards items={glossary} /></section>
   <section id="tutor" class="entry-card"><h2>IA para mis apuntes</h2><p>En Cisco puedes leer objetivos de una captura y resumir un módulo. En Linux puedes resumir el día y consultar cada parte de un comando.</p><div class="button-row"><a class="button secondary" href={withBase('nuevo/')}>Tutor de Cisco</a><a class="button secondary" href={withBase('linux/')}>Tutor de Linux</a></div></section>
 </Layout>
 <style>

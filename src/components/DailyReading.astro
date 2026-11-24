@@ -1,7 +1,4 @@
----
-import { withBase } from '../lib/content';
----
-<section class="entry-card reading-panel" id="daily" data-feed={withBase('lectura-del-dia.json')} data-dev={String(import.meta.env.DEV)}>
+<section class="entry-card reading-panel" id="daily" data-dev={String(import.meta.env.DEV)}>
   <div class="section-heading"><h2>Lectura del día</h2><small id="daily-date"></small></div>
   <article id="daily-article" hidden></article>
   <div class="button-row"><button id="daily-save" class="button primary" type="button" disabled>Guardar lectura</button><button id="daily-refresh" class="button secondary" type="button">Actualizar</button></div>

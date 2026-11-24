@@ -81,6 +81,7 @@ editor.addEventListener('input', () => {
   renderDays();
   try {
     localStorage.setItem(`${keyPrefix}${activeDay}`, JSON.stringify(note));
+    document.dispatchEvent(new Event('study-note-saved'));
     status.textContent = `Día ${activeDay} guardado en este navegador.`;
   } catch {
     status.textContent = 'No se pudo guardar. Descarga el Markdown antes de cerrar la página.';

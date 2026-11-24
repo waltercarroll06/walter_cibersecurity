@@ -11,6 +11,6 @@ export default defineConfig({
   base,
   trailingSlash: 'always',
   devToolbar: { enabled: false },
-  vite: { plugins: [localTutor(), dailyReader()] },
+  vite: { server: { fs: { deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**', '**/private/**'] }, watch: { ignored: ['**/private/**'] } }, plugins: [localTutor(), dailyReader()] },
   markdown: { shikiConfig: { theme: 'github-dark' } },
 });

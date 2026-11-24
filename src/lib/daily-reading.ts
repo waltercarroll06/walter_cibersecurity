@@ -12,3 +12,12 @@ export function editionDate(now: Date) {
   // Bogotá is UTC-5 throughout the year. Editions start at 08:00 local time.
   return new Date(now.getTime() - 13 * 3600_000).toISOString().slice(0,10);
 }
+
+export type PersonalReading = Reading & {profileId:string; note:string; evidence:string; level:string};
+export type Profile = {id:string; notes:{label:string;text:string}[]};
+export function matchesProfile(value:unknown, profile:Profile): value is PersonalReading {
+  if (!validReading(value) || !profile.notes.length) return false;
+  const r=value as PersonalReading;
+  return r.profileId===profile.id && ['Introducción','Práctica guiada','Profundización'].includes(r.level)
+    && typeof r.evidence==='string' && !!r.evidence.trim() && profile.notes.some(n=>n.label===r.note && n.text.includes(r.evidence));
+}
