@@ -31,7 +31,7 @@ const navigation = [
       <a class="brand" href={withBase()} aria-label="Walter's Digital Lab, inicio"><span class="brand-symbol">w<span>.</span></span><span>Walter’s<span class="brand-subtitle">DIGITAL LAB</span></span></a>
       <p class="nav-label">MI ESPACIO</p>
       <nav aria-label="Navegación principal">
-        {navigation.map(([key, path, label, icon]) => <a href={withBase(path)} class:list={['nav-link', { active: active === key }]} aria-current={active === key ? 'page' : undefined}><Icon name={icon} /><span>{label}</span></a>)}
+        {navigation.map(([key, path, label, icon]) => <a href={withBase(path)} class:list={['nav-link', { active: active === key }]} aria-current={active === key ? 'page' : undefined}><Icon name={icon} /><span>{label}</span>{key==='roadmap' && <small id="summary-badge" title="Resúmenes pendientes de leer" hidden></small>}</a>)}
       </nav>
       <div class="sidebar-bottom"><div class="mini-terminal"><span class="mono">~/walter/lab</span><p>Un concepto.<br />Una práctica.<br />Un paso más.</p></div><div class="profile"><span class="avatar">W</span><span>Walter<small>Aprendiendo en público</small></span></div></div>
     </aside>
@@ -42,6 +42,8 @@ const navigation = [
     </div>
     {import.meta.env.DEV && <div hidden id="study-sources" data-notes={JSON.stringify(signedNotes)}></div>}
     <script src="../scripts/study-sync.ts"></script>
+    <script src="../scripts/summary-jobs.ts"></script>
+    <style>#summary-badge:not([hidden]){margin-left:auto;border-radius:1rem;padding:.1rem .5rem;background:var(--accent);color:var(--bg);font-weight:700}</style>
     <script>
       const toggle = document.querySelector<HTMLButtonElement>('#theme-toggle');
       function updateThemeLabel() { toggle?.setAttribute('aria-label', document.documentElement.dataset.theme === 'light' ? 'Activar tema oscuro' : 'Activar tema claro'); }

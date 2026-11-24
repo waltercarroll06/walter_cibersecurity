@@ -70,12 +70,24 @@ async function readBody(req: IncomingMessage) {
 
 export function localTutor(): Plugin {
   let busy = false;
+  type Job = {state:'pending'|'ready'|'error'; controller:AbortController; result?:unknown};
+  const jobs=new Map<string,Job>();
   return {
     name:'walter-local-tutor',
     apply:'serve',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         const path = (req.url ?? '').split('?')[0];
+        const jobId=req.headers['x-walter-job'];
+        const validId=typeof jobId==='string' && /^[0-9a-f-]{36}$/i.test(jobId);
+        if(path==='/__local-ai/job'){
+          if(!isLocalRequest(req,req.method!=='GET') || !validId || req.headers['x-walter-lab']!=='local')return reply(res,403,{});
+          const job=jobs.get(jobId);
+          if(!job)return reply(res,404,{error:'El servidor ya no tiene esta consulta.'});
+          if(req.method==='DELETE'){job.controller.abort();return reply(res,200,{});}
+          if(req.method!=='GET')return reply(res,405,{});
+          return reply(res,200,{state:job.state,result:job.result});
+        }
         if (path !== '/__local-ai/status' && path !== '/__local-ai/generate') return next();
         const generation = path.endsWith('/generate');
         if (!isLocalRequest(req, generation)) return reply(res,403,{error:'La IA solo acepta solicitudes desde esta web en tu equipo.'});
@@ -98,19 +110,30 @@ export function localTutor(): Plugin {
         busy = true;
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 180000);
-        const cancel = () => { if (!res.writableEnded) controller.abort(); };
+        const detached=input.action==='summary' && validId;
+        const job:Job={state:'pending',controller};
+        if(detached){
+          if(jobs.size>=64)jobs.delete(jobs.keys().next().value!);
+          jobs.set(jobId,job);
+          reply(res,202,{id:jobId});
+        }
+        function deliver(code:number,data:unknown){
+          if(detached){job.result=data;job.state=code===200?'ready':'error';}
+          else if(!res.destroyed)reply(res,code,data);
+        }
+        const cancel = () => { if (!detached && !res.writableEnded) controller.abort(); };
         res.on('close',cancel);
         try {
           const response = await fetch(`${OLLAMA}/api/chat`, {
             method:'POST', headers:{'Content-Type':'application/json'}, signal:controller.signal,
             body:JSON.stringify({ model:MODEL, stream:false, keep_alive:'5m', messages:buildMessages(input), options:{temperature:0.2,num_ctx:8192,num_predict:1200} }),
           });
-          if (!response.ok) return reply(res,502,{error:response.status === 404 ? `Falta descargar ${MODEL}. Ejecuta: ollama pull ${MODEL}` : 'Ollama no pudo responder. Comprueba que haya memoria disponible y vuelve a intentarlo.'});
+          if (!response.ok) return deliver(502,{error:response.status === 404 ? `Falta descargar ${MODEL}. Ejecuta: ollama pull ${MODEL}` : 'Ollama no pudo responder. Comprueba que haya memoria disponible y vuelve a intentarlo.'});
           const data = await response.json() as {message?: {content?:string}; done_reason?:string};
           if (!data.message?.content?.trim()) throw new Error('empty');
-          reply(res,200,{text:data.message.content,model:MODEL,truncated:data.done_reason === 'length'});
+          deliver(200,{text:data.message.content,model:MODEL,truncated:data.done_reason === 'length'});
         } catch {
-          if (!res.destroyed) reply(res,503,{error:controller.signal.aborted ? 'La consulta tardó demasiado o fue cancelada. Prueba con menos texto o una captura más pequeña.' : 'No se pudo consultar Ollama. Comprueba que esté abierto y vuelve a intentarlo.'});
+          deliver(503,{error:controller.signal.aborted ? 'La consulta tardó demasiado o fue cancelada. Prueba con menos texto o una captura más pequeña.' : 'No se pudo consultar Ollama. Comprueba que esté abierto y vuelve a intentarlo.'});
         } finally { clearTimeout(timer); res.off('close',cancel); busy = false; }
       });
     },

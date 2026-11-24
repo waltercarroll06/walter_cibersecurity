@@ -31,11 +31,15 @@ const save = () => {
   try { localStorage.setItem(key, JSON.stringify(data())); status.textContent = 'Progreso guardado en este navegador.'; }
   catch { status.textContent = 'No se pudo guardar en este navegador. Exporta un respaldo antes de salir.'; }
 };
-try {
-  const raw = localStorage.getItem(key);
-  if (raw) completed = new Set(parseProgress(raw, ids).completed);
-} catch { status.textContent = 'No se pudo leer el progreso guardado. Puedes importar un respaldo.'; }
-update();
+function restoreProgress(){
+  try {
+    const raw=localStorage.getItem(key);
+    completed=new Set(raw?parseProgress(raw,ids).completed:[]);
+    update();
+  }catch{status.textContent='No se pudo leer el progreso guardado. Puedes importar un respaldo.';}
+}
+restoreProgress();
+window.addEventListener('pageshow',restoreProgress);
 inputs.forEach(input => input.addEventListener('change', () => {
   input.checked ? completed.add(input.dataset.task!) : completed.delete(input.dataset.task!);
   update(); save();

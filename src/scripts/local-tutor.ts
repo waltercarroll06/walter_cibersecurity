@@ -1,3 +1,4 @@
+import {jobs,currentJob,startSummary,saveJob,discardJob,cancelSummary} from './summary-jobs';
 const panel = document.querySelector<HTMLElement>('.tutor-panel')!;
 const connect = document.querySelector<HTMLButtonElement>('#ai-connect')!;
 const connection = document.querySelector<HTMLElement>('#ai-connection')!;
@@ -16,7 +17,11 @@ let controller: AbortController | undefined;
 let objectUrl: string | undefined;
 let imageData: string | undefined;
 let action: 'summary' | 'objectives' = 'summary';
-const buttons = () => { summary.disabled = !ready || !!controller; objectives.disabled = !ready || !imageData || !!controller; connect.disabled = !!controller; fileInput.disabled = !!controller; cancel.hidden = !controller; add.disabled = !!controller; };
+const moduleId=document.querySelector<HTMLSelectElement>('#module-selector')!.value || new URLSearchParams(location.search).get('modulo') || 'libre';
+let shown='';
+const buttons = () => {
+  const pending=jobs().some(j=>j.state==='pending');
+  const mine=currentJob(moduleId)?.state==='pending'; summary.disabled = !ready || pending || !!controller; objectives.disabled = !ready || pending || !imageData || !!controller; connect.disabled = !!controller; fileInput.disabled = !!controller; cancel.hidden = !controller && !mine; add.disabled = !!controller; };
 async function check() {
   ready = false; buttons();
   if (panel.dataset.dev !== 'true') { connection.textContent = 'La IA local funciona al abrir el proyecto con npm.cmd run dev. No está activa en la versión estática publicada.'; connect.disabled = true; return; }
@@ -48,6 +53,12 @@ async function generate(kind: typeof action) {
   const text = kind === 'summary' ? notes.value : '';
   if (kind === 'summary' && (text.trim().length < 30 || text.length > 18000)) { state.textContent = 'El resumen admite entre 30 y 18.000 caracteres. Divide los apuntes largos en varias sesiones.'; return; }
   if (kind === 'objectives' && !imageData) { state.textContent = 'Selecciona una captura primero.'; return; }
+  if(kind==='summary'){
+    resultPanel.hidden=true;
+    try{await startSummary(moduleId,document.querySelector<HTMLInputElement>('#entry-title')!.value,text);}
+    catch{state.textContent='El navegador no pudo guardar la consulta.';}
+    return;
+  }
   controller = new AbortController(); buttons();
   state.textContent = 'La IA está trabajando en tu equipo. La primera respuesta puede tardar mientras se carga el modelo…';
   panel.setAttribute('aria-busy','true');
@@ -63,12 +74,33 @@ async function generate(kind: typeof action) {
 }
 summary.addEventListener('click', () => generate('summary'));
 objectives.addEventListener('click', () => generate('objectives'));
-cancel.addEventListener('click', () => controller?.abort());
+cancel.addEventListener('click', () => {
+  if(controller){controller.abort();return;}
+  const job=currentJob(moduleId);
+  if(job?.state==='pending')void cancelSummary(job.id).catch(()=>{state.textContent='No se pudo cancelar. Puedes volver a intentarlo.';});
+});
+function showSummary(){
+  buttons();
+  const job=currentJob(moduleId);
+  if(!job)return;
+  if(job.state==='pending'){state.textContent='Preparando el resumen. Puedes seguir estudiando en otra sección.';return;}
+  if(job.state==='error'){state.textContent=job.text || 'No se pudo preparar el resumen.';return;}
+  if(shown!==job.id){
+    shown=job.id;action='summary';result.value=job.text || '';resultPanel.hidden=false;state.textContent='Resumen listo para revisar.';
+  }
+  if(job.unread && !document.hidden)saveJob({...job,unread:false});
+}
+document.addEventListener('summary-change',showSummary);
+document.addEventListener('visibilitychange',showSummary);
+window.addEventListener('pageshow',showSummary);
+result.addEventListener('input',()=>{const job=currentJob(moduleId);if(action==='summary' && job?.state==='ready')saveJob({...job,text:result.value});});
+showSummary();
 add.addEventListener('click', () => {
   if (!result.value.trim()) return;
   const heading = action === 'summary' ? 'Resumen asistido por IA' : 'Objetivos extraídos de una captura';
   notes.value += `\n\n## ${heading}\n\n${result.value.trim()}\n`;
   notes.dispatchEvent(new Event('input',{bubbles:true}));
+  if(action==='summary')discardJob(moduleId);
   resultPanel.hidden = true; result.value = '';
   state.textContent = 'Respuesta añadida al final. Revisa el estado de guardado del editor y descarga una copia de tus apuntes.';
 });

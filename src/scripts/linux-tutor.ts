@@ -1,3 +1,4 @@
+import {jobs} from './summary-jobs';
 export {};
 const tutor = document.querySelector<HTMLElement>('#linux-tutor')!;
 const button = (id: string) => tutor.querySelector<HTMLButtonElement>('#linux-' + id)!;
@@ -12,8 +13,9 @@ let ready = false;
 let active: AbortController | undefined;
 
 function controls() {
-  summary.disabled = !ready || !!active || !dayHeading.textContent;
-  explain.disabled = !ready || !!active || !command.value.trim();
+  const ciscoBusy=jobs().some(j=>j.state==='pending');
+  summary.disabled = ciscoBusy || !ready || !!active || !dayHeading.textContent;
+  explain.disabled = ciscoBusy || !ready || !!active || !command.value.trim();
   cancel.hidden = !active;
   connect.disabled = !!active || tutor.dataset.dev !== 'true';
 }
@@ -52,6 +54,7 @@ async function ask(action: 'linux-summary' | 'linux-command') {
   finally { active = undefined; controls(); }
 }
 document.addEventListener('linux-day-opened', () => { active?.abort(); answer.hidden = true; status.textContent = ''; controls(); });
+document.addEventListener('summary-change',controls);
 command.addEventListener('input', controls);
 connect.addEventListener('click', check);
 cancel.addEventListener('click', () => active?.abort());

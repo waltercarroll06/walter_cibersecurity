@@ -6,6 +6,7 @@ const total = courseModules.reduce((sum, module) => sum + module.topics.length, 
 ---
 <Layout title="Plan de estudio" active="roadmap">
   <div class="page-heading"><div><p class="eyebrow">CISCO NETWORKING ACADEMY · CONCEPTOS BÁSICOS DE REDES V2.0</p><h1>Mi camino en redes</h1><p>17 módulos, una sesión a la vez. Abre un módulo para consultar sus objetivos y empezar tus apuntes.</p></div></div>
+  <div id="summary-inbox" class="button-row"></div>
   <section class="progress-panel"><div><h2 id="progress-label">0 de {total} temas</h2><p id="modules-progress">0 de 17 módulos completados</p><p>Tu avance es personal y se guarda en este navegador. No se sincroniza con Cisco.</p></div><strong id="progress-percent">0%</strong><progress id="total-progress" max={total} value="0" aria-labelledby="progress-label"></progress></section>
   <div class="roadmap-actions"><button class="button secondary" id="export-progress">Exportar respaldo</button><label class="button secondary" for="import-progress">Importar respaldo</label><input class="file-input" id="import-progress" type="file" accept="application/json,.json" /><span class="small muted">Importar reemplaza las marcas actuales.</span></div><p id="storage-status" class="status-message" role="status" aria-live="polite"></p>
   <noscript><div class="callout">Activa JavaScript para marcar y guardar tu progreso.</div></noscript>

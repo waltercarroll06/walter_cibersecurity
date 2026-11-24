@@ -19,11 +19,11 @@ test('la recarga usa los apuntes vigentes y conserva el cupo ante errores, cambi
       const {messages}=JSON.parse(String(init?.body));
       const data=JSON.parse(messages[1].content);
       const answer=Array.isArray(data)
-        ? {note:data[0].label,evidence:data[0].text,topic:'Redes',search:'router',level:'Introducción'}
+        ? {topic:'Routers',evidence:'El modelo parafraseó el texto en vez de citarlo'}
         : {index:0,title:'Routers actualizados',summary:'Se actualizó el router.',practice:'Relaciona la noticia con tu esquema.'};
       return Response.json({message:{content:JSON.stringify(answer)}});
     }
-    assert.equal(url.searchParams.get('search'),'router');
+    assert(['router','networking'].includes(url.searchParams.get('search') ?? ''));
     searches++;
     const posts=newsAvailable?[{title:{rendered:'Routers'},excerpt:{rendered:'El fabricante ha actualizado sus routers.'},date_gmt:new Date(Date.now()-3600000).toISOString().slice(0,19),link:url.origin+'/routers/'}]:[];
     return Response.json(posts);

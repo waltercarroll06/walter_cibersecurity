@@ -53,21 +53,57 @@ async function searchNews(term:string) {
   if(results.every(r=>r.status==='rejected')) throw new Error('No se pudo conectar con las fuentes. Comprueba Internet y vuelve a intentar.');
   return results.flatMap(r=>r.status==='fulfilled'?r.value:[]).sort((a,b)=>b.published.localeCompare(a.published));
 }
+export function readingTopics(notes:Profile['notes']){
+  const vocabulary:[RegExp,string,string][]=[
+    [/\b(ancho de banda|bandwidth)\b/i,'Ancho de banda','bandwidth'],
+    [/\b(router|enrutador)(es|s)?\b/i,'Routers','router'],
+    [/\b(redes|red local|conexión de red)\b/i,'Redes','networking'],
+    [/\b(latencia|latency)\b/i,'Latencia','latency'],
+    [/\b(linux|bash|echo|pwd|mkdir)\b/i,'Comandos de Linux','Linux shell'],
+    [/\b(dns|ethernet|tcp|wi-?fi|ipv[46]|virtualbox|docker)\b/i,'',''],
+    [/\b(forense|forensia|forensics)\b/i,'Forensia digital','digital forensics'],
+  ];
+  const topics:{note:string;evidence:string;topic:string;search:string;level:string}[]=[];
+  for(const n of notes){
+    for(const [pattern,title,term] of vocabulary){
+      const line=n.text.split(/\n|(?<=[.!?])\s+/).find(l=>pattern.test(l) && !/no (?:he |hemos )?(?:estudiado|visto)|pendiente de estudiar/i.test(l));
+      const match=line?.match(pattern);
+      if(line && match)topics.push({note:n.label,evidence:line.trim(),topic:title || match[0],search:term || match[0],level:'Introducción'});
+    }
+  }
+  return topics;
+}
 async function recommend(profile:Profile,date:string,previous?:PersonalReading):Promise<PersonalReading> {
   const start=Math.floor(Date.parse(date)/86400000)%profile.notes.length;
   const notes=[...profile.notes.slice(start),...profile.notes.slice(0,start)].slice(0,12);
-  const plan=await askLocal('Escoge un concepto que el estudiante ya ha trabajado. Prioriza sus dudas. Devuelve JSON con topic (concepto en español), search (una o dos palabras técnicas genéricas en inglés para buscar noticias, sin nombres personales, direcciones, rutas ni texto privado), note (etiqueta exacta), evidence (cita breve literal del cuerpo), level (Introducción si hay dudas o poca evidencia, Práctica guiada si explica un ejemplo, Profundización si compara y justifica). Si falta evidencia devuelve {}.',notes);
-  const note=notes.find(n=>n.label===plan.note && typeof plan.evidence==='string' && plan.evidence.trim() && n.text.includes(plan.evidence));
-  if(!note || typeof plan.topic!=='string' || typeof plan.search!=='string' || !/^[a-z][a-z0-9-]{0,25}(?: [a-z0-9-]{1,26})?$/i.test(plan.search) || !['Introducción','Práctica guiada','Profundización'].includes(plan.level)) throw new Error('No encontré un tema claro. Añade una explicación o una duda a tu apunte.');
-  const sources=(await searchNews(plan.search)).filter(s=>s.url!==previous?.url);
+  const suggestions=readingTopics(notes);
+  const proposal=await askLocal('Selecciona un concepto trabajado en los apuntes. Devuelve JSON: note (etiqueta), evidence (frase textual), topic (tema en español), search (término técnico público en inglés), level (Introducción, Práctica guiada o Profundización). No uses nombres personales, direcciones ni texto privado como consulta de búsqueda.',notes.map(n=>({...n,text:n.text.length<=1600?n.text:n.text.slice(0,800)+'\n…\n'+n.text.slice(-800)}))).catch(error=>{if(error instanceof SyntaxError)return {};throw error;});
+  const fold=(text:string)=>text.normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/\s+/g,' ').trim();
+  if(typeof proposal?.evidence==='string' && proposal.evidence.trim() && typeof proposal.search==='string' && typeof proposal.topic==='string'){
+    const quote=fold(proposal.evidence.replace(/^[“«"]|[”»"]$/g,''));
+    const note=quote && notes.find(n=>fold(n.text).includes(quote));
+    const evidence=note && (note.text.includes(proposal.evidence)?proposal.evidence:note.text.split('\n').find(line=>fold(line).includes(quote)));
+    const search=proposal.search.trim();
+    if(note && evidence && /^[a-z][a-z0-9-]{0,25}(?: [a-z0-9-]{1,26}){0,2}$/i.test(search)){
+      suggestions.unshift({note:note.label,evidence,search,topic:proposal.topic,level:['Práctica guiada','Profundización'].includes(proposal.level)?proposal.level:'Introducción'});
+    }
+  }
+  if(!suggestions.length)throw new Error('No encontré un concepto que pueda relacionar con tus notas. Añade un ejemplo de lo que estudiaste.');
   const noMatch='No encontré una novedad reciente que encaje con tus apuntes y tu nivel.';
-  if(!sources.length) throw new Error(noMatch);
+  const attempts=new Set<string>();
+  for(const plan of suggestions){
+    if(attempts.has(plan.search.toLowerCase()))continue;
+    if(attempts.size===3)break;
+    attempts.add(plan.search.toLowerCase());
+    const sources=(await searchNews(plan.search)).filter(s=>s.url!==previous?.url);
+    if(!sources.length)continue;
   const copy=await askLocal('Elige una publicación que trate directamente el concepto estudiado y pueda entenderse al nivel indicado. Si ninguna encaja, devuelve {}. Explica en español qué novedad presenta según el extracto, relaciónala con el apunte y añade una práctica defensiva sencilla. No inventes detalles, fechas ni enlaces. Devuelve JSON con index (entero de la fuente), title, summary y practice.',{topic:plan.topic,level:plan.level,evidence:plan.evidence,sources:sources.map((s,index)=>({index,title:s.title,text:s.text,published:s.published}))});
   const source=Number.isInteger(copy.index) && sources[copy.index];
-  if(!source) throw new Error(noMatch);
+  if(!source)continue;
   const item={date,profileId:profile.id,note:plan.note,evidence:plan.evidence,level:plan.level,topic:plan.topic,title:copy.title,summary:copy.summary,practice:copy.practice,source:source.publisher+' · '+source.published+' · '+source.title,url:source.url};
-  if(!matchesProfile(item,profile)) throw new Error(noMatch);
-  return item;
+  if(matchesProfile(item,profile))return item;
+  }
+  throw new Error(noMatch);
 }
 export function dailyReader():Plugin {
   return {name:'walter-daily-reader',apply:'serve',configureServer(server){
@@ -115,9 +151,9 @@ export function dailyReader():Plugin {
         if(syncing) {
           if(req.headers['x-walter-lab']!=='local' || !req.headers['content-type']?.startsWith('application/json'))return send(415,{});
           const chunks:Buffer[]=[];let bytes=0;
-          for await(const part of req){bytes+=part.length;if(bytes>500000)return send(413,{});chunks.push(Buffer.from(part));}
+          for await(const part of req){bytes+=part.length;if(bytes>5000000)return send(413,{});chunks.push(Buffer.from(part));}
           const input=JSON.parse(Buffer.concat(chunks).toString('utf8'));
-          if(!Array.isArray(input)||input.length>60 || !input.every(n=>n && typeof n.label==='string' && n.label.length<=160 && typeof n.text==='string' && n.text.trim() && n.text.length<=1600))return send(400,{});
+          if(!Array.isArray(input)||input.length>60 || !input.every(n=>n && typeof n.label==='string' && n.label.length<=160 && typeof n.text==='string' && n.text.trim() && n.text.length<=18000))return send(400,{});
           const notes=input.map(n=>({label:n.label,text:n.text}));
           const id=createHash('sha256').update(JSON.stringify(notes)).digest('hex');
           if((await readJson(profilePath))?.id!==id){await mkdir(dir,{recursive:true});await atomicSave(profilePath,{id,notes});}

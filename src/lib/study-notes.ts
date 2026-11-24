@@ -23,5 +23,5 @@ export function studyNotes(storage: Storage, base: string, published: StudyNote[
       if (typeof entry?.body==='string') collected.push({label,text:personalText(entry.body)});
     } catch { /* Ignore an unreadable draft without losing other notes. */ }
   }
-  return collected.filter(n=>n.text.length>0).map(n=>({label:n.label.slice(0,160),text:n.text.slice(-1600)})).slice(-60);
+  return collected.filter(n=>n.text.length>0).map(n=>({label:n.label.slice(0,160),text:n.text.slice(0,18000)})).slice(-60);
 }

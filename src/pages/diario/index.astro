@@ -3,4 +3,4 @@ import DailyReading from '../../components/DailyReading.astro';
 import Layout from '../../layouts/Layout.astro';
 import { withBase } from '../../lib/content';
 ---
-<Layout title="Diario de estudio" active="diario"><div class="page-heading"><div><p class="eyebrow">APRENDER Y DEJAR HUELLA</p><h1>Diario de estudio</h1><p>Ideas, comandos, dudas y pequeñas conexiones de cada sesión.</p></div><a class="button primary" href={withBase('nuevo/')}>Nuevo apunte</a></div><DailyReading /></Layout>
+<Layout title="Diario de estudio" active="diario"><div class="page-heading"><div><p class="eyebrow">APRENDER Y DEJAR HUELLA</p><h1>Diario de estudio</h1><p>Ideas, comandos, dudas y pequeñas conexiones de cada sesión.</p></div><div class="button-row"><a class="button primary" href={withBase('nuevo/')}>Escribir mis apuntes</a><a class="button secondary" href={withBase('roadmap/')}>Actualizar mi plan de estudio</a></div></div><DailyReading /></Layout>

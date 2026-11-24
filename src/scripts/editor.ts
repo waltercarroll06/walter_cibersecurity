@@ -1,3 +1,4 @@
+import {moduleCompletion} from './module-completion';
 import { courseModules } from '../data/course';
 import { freeTemplate } from '../lib/free-template';
 import { moduleTemplate } from '../lib/course-template';
@@ -77,3 +78,5 @@ document.querySelector('#copy-markdown')?.addEventListener('click', async () => 
   try { await navigator.clipboard.writeText(markdown()); status.textContent = 'Markdown copiado al portapapeles.'; }
   catch { status.textContent = 'El navegador no permitió copiar. Usa Descargar Markdown.'; }
 });
+
+if(selectedModule)moduleCompletion(document.querySelector<HTMLButtonElement>('#complete-module')!,()=>selectedModule,status);
