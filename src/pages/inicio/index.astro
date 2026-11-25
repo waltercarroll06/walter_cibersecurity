@@ -1,4 +1,10 @@
 ---
+import Icon from '../../components/Icon.astro';
+const destinations = [
+  ['roadmap/', 'route', 'Plan de redes', 'Elige un módulo de Cisco y marca tu avance.'],
+  ['linux/', 'terminal', 'Bitácora de Linux', 'Practica un comando y registra lo que descubriste.'],
+  ['diario/', 'book', 'Diario de estudio', 'Lee el consejo del día o vuelve a tus lecturas guardadas.'],
+];
 import Layout from '../../layouts/Layout.astro';
 import { withBase } from '../../lib/content';
 ---
@@ -10,11 +16,37 @@ import { withBase } from '../../lib/content';
       if(Date.now()-entered<10000) document.documentElement.classList.add('from-portal');
     } catch {}
   </script>
-  <section class="hero-copy"><p class="eyebrow">MI LEARNING JOURNEY · REDES</p><h1>Un módulo al día.<br /><span>Aprender y tomar apuntes.</span></h1><p class="hero-description">Mis apuntes de Cisco por módulo y mis prácticas de Linux por día de estudio.</p><div class="button-row"><a class="button primary" href={withBase('nuevo/')}>Escribir mis apuntes</a><a class="button secondary" href={withBase('roadmap/')}>Mi plan de estudio</a><a class="button secondary" href={withBase('linux/')}>Abrir bitácora de Linux</a></div></section></Layout>
+  <section class="notebook">
+    <div><h1>Mis apuntes</h1><p>Vuelve a tus notas de redes o abre uno de tus libros.</p>
+    <a class="button primary" href={withBase('apuntes/')}>Abrir mis apuntes <span aria-hidden="true">↗</span></a></div>
+    <div class="sheets" aria-hidden="true"><i></i><i></i><i><Icon name="network" size={48}/></i></div>
+  </section>
+  <nav class="study-links" aria-label="Estudiar y practicar">
+    {destinations.map(([path,icon,title,detail])=><a href={withBase(path)}><span class="tile-icon"><Icon name={icon}/></span><h2>{title}</h2><p>{detail}</p><span class="arrow" aria-hidden="true">↗</span></a>)}
+  </nav>
+</Layout>
 
 <style is:global>
   @media(prefers-reduced-motion:no-preference){
     html.from-portal::after{content:'';position:fixed;inset:0;z-index:100;pointer-events:none;background:#111617;animation:portal-arrival .45s ease-out forwards}
     @keyframes portal-arrival{to{opacity:0;visibility:hidden}}
   }
+</style>
+
+<style>
+  .notebook{isolation:isolate;position:relative;overflow:hidden;background:#d3ecd7;color:#19392f;border-radius:18px;display:flex;align-items:center;min-height:clamp(15rem,32vh,22rem);padding:clamp(1.5rem,5vw,4rem)}
+  .notebook h1{font-size:clamp(2.7rem,6vw,5.6rem);letter-spacing:-.065em;line-height:1;margin:0}
+  .notebook p{max-width:28rem;margin:1rem 0 1.6rem;color:#324e43}
+  .notebook .primary{background:#19392f;color:white;border-color:#19392f;gap:1rem}
+  .sheets{position:absolute;right:9%;width:15%;height:57%;z-index:-1;transform:rotate(12deg)}
+  .sheets i{position:absolute;inset:0;border:1px solid #638e72;border-radius:8px;background:#adcdb3;transform:translate(-18%,12%) rotate(-14deg)}
+  .sheets i:nth-child(2){transform:translate(-9%,6%) rotate(-7deg);background:#bbdcc1}
+  .sheets i:last-child{transform:none;display:grid;place-items:center;background:repeating-linear-gradient(0deg,transparent 0 17px,#97bd9f 18px),#ddf1df}
+  .study-links{margin-top:1.2rem;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
+  .study-links a{position:relative;padding:1.4rem;border-radius:14px;border:1px solid var(--line);background:var(--panel)}
+  .study-links a:is(:hover,:focus-visible){border-color:var(--accent)}
+  .tile-icon{color:var(--accent)}.arrow{position:absolute;right:1.3rem;top:1.2rem;color:var(--muted)}
+  .study-links h2{font-size:1.2rem;margin:1.3rem 0 .4rem}.study-links p{color:var(--muted);margin:0;line-height:1.5}
+  @media(max-width:1050px){.sheets{display:none}}
+  @media(max-width:760px){.study-links{grid-template-columns:1fr}.study-links h2{margin:.5rem 0 .25rem}}
 </style>

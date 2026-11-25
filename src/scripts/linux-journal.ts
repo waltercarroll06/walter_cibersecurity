@@ -120,3 +120,13 @@ if(pos!==null && /^\d+$/.test(pos)){
   const end=body.value.indexOf('\n',start);
   body.focus();body.setSelectionRange(start,end<0?body.value.length:end);body.scrollIntoView({block:'center'});
 }
+
+document.querySelector('#linux-delete')!.addEventListener('click',()=>{
+  if (!activeDay || !confirm('¿Borrar el apunte de Linux del día '+activeDay+' de este navegador?')) return;
+  const key=keyPrefix+activeDay;
+  localStorage.setItem('wdl:recovered:v1:'+key,'1');
+  localStorage.removeItem(key);
+  localStorage.removeItem('wdl:cisco-summary:v1:'+import.meta.env.BASE_URL+':linux:Día '+activeDay);
+  sessionStorage.removeItem(keyPrefix+'open');
+  location.replace(location.pathname);
+});

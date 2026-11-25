@@ -1,0 +1,81 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { courseModules } from '../data/course';
+import { withBase } from '../lib/content';
+---
+<Layout title="Mis apuntes" active="apuntes">
+  <div class="page-heading"><h1>Mis apuntes</h1></div>
+  <nav class="sections" aria-label="Categorías de apuntes">
+    <a class="button secondary" href="#redes" aria-current="page">Redes</a>
+    <a class="button secondary" href="#otros">Otros</a>
+  </nav>
+  <section id="redes">
+    <h2>Módulos de redes</h2>
+    <div class="modules">
+      {courseModules.map(m => <a href={withBase('nuevo/') + '?modulo=' + m.id}><span class="tag">Módulo {m.number}</span> {m.title}</a>)}
+      <a href={withBase('nuevo/')}>Apunte libre de redes</a>
+    </div>
+  </section>
+  <section id="otros" hidden>
+    <h2>Mis libros</h2>
+    <form id="book-form">
+      <label for="book-name">Título del libro</label>
+      <div class="button-row"><input id="book-name" required maxlength="160" /><button class="button primary">Añadir libro</button></div>
+    </form>
+    <p id="book-status" role="status"></p>
+    <div class="modules" id="book-list"></div>
+  </section>
+</Layout>
+<style>
+  .sections{display:flex;gap:.6rem;border-bottom:1px solid var(--line);padding-bottom:1rem;margin-bottom:1.5rem}
+  .sections [aria-current]{border-color:var(--accent);color:var(--accent)}
+  .modules{display:grid;gap:.5rem}
+  .modules a{display:flex;align-items:center;gap:.8rem;padding:.85rem 1rem;border:1px solid var(--line);border-radius:.5rem;text-decoration:none}
+  .modules a:hover,.modules a:focus-visible{border-color:var(--accent)}
+  #book-name{width:min(100%,26rem)}
+</style>
+<script>
+  import {bookPrefix} from '../lib/books';
+  const prefix = bookPrefix(import.meta.env.BASE_URL);
+  const editor = import.meta.env.BASE_URL.replace(/\/?$/, '/') + 'nuevo/?libro=';
+  const status = document.querySelector<HTMLElement>('#book-status')!;
+  function books() {
+    const list = document.querySelector<HTMLElement>('#book-list')!;
+    list.replaceChildren();
+    for (const key of Object.keys(localStorage).filter(k => k.startsWith(prefix))) {
+      try {
+        const book = JSON.parse(localStorage.getItem(key)!);
+        const link = document.createElement('a');
+        link.href = editor + encodeURIComponent(key.slice(prefix.length));
+        link.textContent = book.title || 'Libro sin título';
+        list.append(link);
+      } catch { continue; }
+    }
+    status.textContent = list.childElementCount ? '' : 'Aquí aparecerán tus libros.';
+  }
+  function showSection() {
+    const other = location.hash === '#otros';
+    document.querySelector<HTMLElement>('#redes')!.hidden = other;
+    document.querySelector<HTMLElement>('#otros')!.hidden = !other;
+    document.querySelectorAll('.sections a').forEach(link => {
+      if (link.getAttribute('href') === (other ? '#otros' : '#redes')) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+    if (other) books();
+  }
+  window.addEventListener('hashchange', showSection);
+  window.addEventListener('pageshow', showSection);
+  window.addEventListener('storage', showSection);
+  showSection();
+  document.querySelector('#book-form')!.addEventListener('submit', event => {
+    event.preventDefault();
+    const input = document.querySelector<HTMLInputElement>('#book-name')!;
+    const title = input.value.trim();
+    if (!title) {input.focus();return;}
+    const id = crypto.randomUUID();
+    try {
+      localStorage.setItem(prefix + id, JSON.stringify({version:1, title, body:'', type:'Apunte', category:'Otros'}));
+      location.assign(editor + id);
+    } catch { status.textContent = 'No se pudo guardar el libro en este navegador.'; }
+  });
+</script>

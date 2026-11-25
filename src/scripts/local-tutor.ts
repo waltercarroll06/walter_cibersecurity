@@ -17,7 +17,8 @@ let controller: AbortController | undefined;
 let objectUrl: string | undefined;
 let imageData: string | undefined;
 let action: 'summary' | 'objectives' = 'summary';
-const moduleId=document.querySelector<HTMLSelectElement>('#module-selector')!.value || new URLSearchParams(location.search).get('modulo') || 'libre';
+const book = new URLSearchParams(location.search).get("libro");
+const moduleId=book ? "libro:"+book : document.querySelector<HTMLSelectElement>('#module-selector')!.value || new URLSearchParams(location.search).get('modulo') || 'libre';
 let shown='';
 const buttons = () => {
   const pending=jobs().some(j=>j.state==='pending');

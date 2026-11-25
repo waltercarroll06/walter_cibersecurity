@@ -1,3 +1,4 @@
+import {bookPrefix} from '../lib/books';
 import {courseModules} from '../data/course';
 import { searchEntries, type SearchEntry } from '../lib/search';
 const form = document.querySelector<HTMLFormElement>('#search-form')!;
@@ -16,21 +17,23 @@ function drafts():SearchEntry[]{
     const prefix='wdl:cisco-nb2:draft:v1:'+scope+':',linuxPrefix='wdl:linux:day:v1:'+scope+':';
     const linux=key.startsWith(linuxPrefix);
     const mod=key.startsWith(prefix)?courseModules.find(m=>m.id===key.slice(prefix.length)):undefined;
-    if(!linux && !mod && key!=='wdl:draft:v1:'+scope)continue;
+    const book=key.startsWith(bookPrefix(scope));
+    if(!book && !linux && !mod && key!=='wdl:draft:v1:'+scope)continue;
     try{
       const d=JSON.parse(localStorage.getItem(key) || 'null');
-      if(typeof d?.body!=='string' || !d.body.trim())continue;
+      if(typeof d?.body!=='string' || (!d.body.trim() && !book))continue;
       const day=key.slice(linuxPrefix.length);
       const parent=linux?'Día '+day+(d.title?' · '+d.title:''):mod?'Módulo '+mod.number+' · '+mod.title:d.title || 'Apunte libre';
       const url=new URL(base+(linux?'linux/':'nuevo/'),location.origin);
       if(linux)url.searchParams.set('dia',day);
+      if(book)url.searchParams.set('libro',key.slice(bookPrefix(scope).length));
       if(mod)url.searchParams.set('modulo',mod.id);
       let heading='',lines:string[]=[],position=0,offset=0,fence='';
       function add(){
         const body=lines.join('\n').trim();
-        if(!heading && !body)return;
+        if(!heading && !body && !(book && !d.body.trim()))return;
         url.searchParams.set('pos',String(position));
-        entries.push({title:heading || parent,description:heading?parent:body.slice(0,140),body,category:linux?'Linux':'Redes',tags:[parent,d.title || ''],type:'Apunte',url:url.href});
+        entries.push({title:heading || parent,description:heading?parent:body.slice(0,140) || 'Mis libros',body,category:linux?'Linux':book?'Otros':'Redes',tags:[parent,d.title || '',d.type || ''],type:d.type && d.type!=='notes'?d.type:'Apunte',url:url.href});
       }
       for(const line of d.body.split('\n')){
         const marker=line.trimStart().match(/^(`{3,}|~{3,})/);

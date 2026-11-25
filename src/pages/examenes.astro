@@ -1,0 +1,65 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Exámenes" active="examenes">
+  <div class="page-heading"><div><h1>Tarjetas de repaso</h1><p>Elige un apunte. Intenta responder cada pregunta antes de revelar la explicación.</p></div></div>
+  <label for="source">Apunte para estudiar</label>
+  <select id="source"></select>
+  <div class="button-row"><button class="button primary" id="generate" disabled>Preparar tarjetas</button></div>
+  <p id="feedback" role="status"></p>
+  <section id="card" class="entry-card" hidden>
+    <small id="position"></small><h2 id="question"></h2>
+    <div id="solution" hidden><p id="answer"></p><p id="extra"></p></div>
+    <button class="button secondary" id="flip">Ver respuesta</button>
+    <button class="button secondary" id="next" hidden>Siguiente</button>
+  </section>
+  <script>
+    import {studyNotes} from '../lib/study-notes';
+    const get=(id:string)=>document.getElementById(id)!;
+    const source=get('source') as HTMLSelectElement;
+    const generate=get('generate') as HTMLButtonElement;
+    const status=get('feedback');
+    let notes:ReturnType<typeof studyNotes>=[];
+    let cards:{question:string;answer:string;extra:string}[]=[];
+    let index=0, busy=false;
+    function sources(){
+      if(busy)return;
+      const old=source.value;
+      const published=JSON.parse(getPublished() || '[]');
+      notes=studyNotes(localStorage,import.meta.env.BASE_URL,published);
+      source.replaceChildren(...notes.map((n,i)=>new Option(n.label,String(i))));
+      if(notes[Number(old)])source.value=old || '0';
+      generate.disabled=!notes.length;
+      if(!cards.length)status.textContent=notes.length?'Se usará el texto del apunte seleccionado con tu proveedor de IA configurado.':'Escribe primero un apunte de redes, Linux o un libro.';
+    }
+    function getPublished(){return document.querySelector<HTMLElement>('#study-sources')?.dataset.notes;}
+    function show(){
+      const card=cards[index];
+      get('card').hidden=false;
+      get('position').textContent='Tarjeta '+(index+1)+' de '+cards.length;
+      get('question').textContent=card.question;
+      get('answer').textContent=card.answer;
+      get('extra').textContent=card.extra?'Para profundizar · '+card.extra:'';
+      get('solution').hidden=true;get('flip').hidden=false;get('next').hidden=true;
+      get('next').textContent=index===cards.length-1?'Finalizar':'Siguiente';
+    }
+    source.onchange=()=>{get('card').hidden=true;cards=[];status.textContent='';};
+    generate.onclick=async()=>{
+      const note=notes[Number(source.value)];if(!note || busy)return;
+      busy=true;generate.disabled=true;source.disabled=true;get('card').hidden=true;status.textContent='Preparando tus tarjetas…';
+      try{
+        const r=await fetch('/__local-ai/generate',{method:'POST',headers:{'Content-Type':'application/json','X-Walter-Lab':'local'},body:JSON.stringify({action:'flashcards',title:note.label,text:note.text})});
+        const data=await r.json();if(!r.ok)throw Error(data.error);
+        const parsed=JSON.parse(data.text).cards;
+        if(!Array.isArray(parsed))throw Error('La IA devolvió un formato inesperado.');
+        cards=parsed.filter(c=>c && typeof c.question==='string' && c.question.trim() && typeof c.answer==='string' && c.answer.trim() && typeof c.extra==='string').slice(0,5);
+        if(!cards.length)throw Error('No se recibieron tarjetas válidas. Inténtalo otra vez.');
+        index=0;status.textContent=note.label;show();
+      }catch(e){status.textContent=e instanceof Error?e.message:'No se pudo preparar el repaso.';}
+      finally{busy=false;generate.disabled=false;source.disabled=false;}
+    };
+    get('flip').onclick=()=>{get('solution').hidden=false;get('flip').hidden=true;get('next').hidden=false;get('next').focus();};
+    get('next').onclick=()=>{if(++index<cards.length){show();get('flip').focus();}else{get('card').hidden=true;status.textContent='Repaso terminado. Has revisado '+cards.length+' tarjetas.';generate.focus();}};
+    sources();document.addEventListener('study-draft-restored',sources);
+  </script>
+</Layout>

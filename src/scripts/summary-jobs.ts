@@ -52,9 +52,9 @@ function navigation(){
   if(list)list.replaceChildren(...unread.map(job=>{
     const link=document.createElement('a');
     const module=courseModules.find(m=>m.id===job.module);
-    link.href=base.replace(/\/?$/,'/')+'nuevo/'+(module?'?modulo='+module.id:'')+'#tutor-title';
+    link.href=base.replace(/\/?$/,'/')+'nuevo/'+(module?'?modulo='+module.id:job.module.startsWith('libro:')?'?libro='+encodeURIComponent(job.module.slice(6)):'')+'#tutor-title';
     link.className='button secondary';
-    link.textContent=module?'Ver resumen del módulo '+module.number:'Ver resumen del apunte libre';
+    link.textContent=module?'Ver resumen del módulo '+module.number:job.module.startsWith('libro:')?'Ver resumen del libro':'Ver resumen del apunte libre';
     return link;
   }));
 }

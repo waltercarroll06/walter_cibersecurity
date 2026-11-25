@@ -1,8 +1,11 @@
+import { loadEnv } from 'vite';
 import { defineConfig } from 'astro/config';
 import { dailyReader } from './src/server/daily-reading.ts';
 import { localTutor } from './src/server/local-ai.ts';
 
 // GitHub Actions supplies the repository name; local development stays at /.
+const env = loadEnv('development', process.cwd(), 'GROQ_');
+if (env.GROQ_API_KEY) process.env.GROQ_API_KEY ??= env.GROQ_API_KEY;
 const [owner, repository] = (process.env.GITHUB_REPOSITORY ?? '').split('/');
 const base = process.env.SITE_BASE ?? (repository && repository !== `${owner}.github.io` ? `/${repository}/` : '/');
 export default defineConfig({
