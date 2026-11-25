@@ -12,7 +12,9 @@ const update = () => {
   document.querySelectorAll<HTMLElement>('[data-stage]').forEach(stage => {
     const tasks = [...stage.querySelectorAll<HTMLInputElement>('[data-task]')];
     const count = tasks.filter(task => task.checked).length;
-    stage.querySelector('.stage-count')!.textContent = `${count} / ${tasks.length}`;
+    const finished=count===tasks.length && count>0;
+    stage.classList.toggle('completed',finished);
+    stage.querySelector('.stage-count')!.textContent = finished ? '✓ Completado' : `${count} / ${tasks.length}`;
     const toggle = stage.querySelector<HTMLInputElement>('[data-module-toggle]')!;
     toggle.checked = count === tasks.length;
     toggle.indeterminate = count > 0 && count < tasks.length;

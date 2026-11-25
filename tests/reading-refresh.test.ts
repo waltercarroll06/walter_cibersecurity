@@ -23,10 +23,13 @@ test('la recarga usa los apuntes vigentes y conserva el cupo ante errores, cambi
         : {index:0,title:'Routers actualizados',summary:'Se actualizó el router.',practice:'Relaciona la noticia con tu esquema.'};
       return Response.json({message:{content:JSON.stringify(answer)}});
     }
-    assert(['router','networking'].includes(url.searchParams.get('search') ?? ''));
-    searches++;
-    const posts=newsAvailable?[{title:{rendered:'Routers'},excerpt:{rendered:'El fabricante ha actualizado sus routers.'},date_gmt:new Date(Date.now()-3600000).toISOString().slice(0,19),link:url.origin+'/routers/'}]:[];
-    return Response.json(posts);
+    if(url.hostname==='hn.algolia.com'){
+      assert(['router','networking'].includes(url.searchParams.get('query') ?? ''));
+      searches++;
+      const hits=newsAvailable?[{title:'Router updates',story_text:'Nuevas funciones de routers',objectID:'12345',created_at:new Date(Date.now()-3600000).toISOString()}]:[];
+      return Response.json({hits});
+    }
+    return new Response(null,{status:403});
   });
   function open(){
     const close=new EventEmitter();
@@ -61,6 +64,6 @@ test('la recarga usa los apuntes vigentes y conserva el cupo ante errores, cambi
   const revised=url((await put('Otra duda sobre routers.')).data.profileId);
   const result=await open()(revised,'POST');
   assert.equal(result.data.used,true);
-  assert.match(result.data.item.url,/\/routers\/$/);
+  assert.equal(result.data.item.url,'https://news.ycombinator.com/item?id=12345');
   assert.equal(searches,total);
 });

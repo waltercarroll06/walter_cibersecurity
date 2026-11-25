@@ -29,9 +29,45 @@ function plain(html:string) {
   return html.replace(/<[^>]*>/g,' ').replace(/&(?:amp|nbsp|quot|lt|gt|#39|#8217|#8211);/g,
     entity=>({'&amp;':'&','&nbsp;':' ','&quot;':'"','&lt;':'<','&gt;':'>','&#39;':"'",'&#8217;':"'",'&#8211;':'–'}[entity] ?? entity)).replace(/\s+/g,' ').trim();
 }
+async function communityArticles(term:string,after:Date,now:number):Promise<NewsSource[]> {
+  const api=new URL('https://hn.algolia.com/api/v1/search');
+  api.search=new URLSearchParams({query:term,tags:'story',restrictSearchableAttributes:'title',typoTolerance:'false',
+    hitsPerPage:'30',numericFilters:'created_at_i>'+Math.floor(after.getTime()/1000)}).toString();
+  const res=await fetch(api,{signal:AbortSignal.timeout(12000)});
+  if(!res.ok)throw new Error('Fuente no disponible');
+  const {hits}=await res.json();
+  if(!Array.isArray(hits))throw new Error('Fuente no disponible');
+  const words=term.toLowerCase().split(/\s+/);
+  return hits.flatMap(hit=>{
+    if(typeof hit.title!=='string' || !/^\d+$/.test(String(hit.objectID)))return [];
+    const time=Date.parse(hit.created_at);
+    if(!Number.isFinite(time) || time<after.getTime() || time>now || !words.every(word=>hit.title.toLowerCase().includes(word)))return [];
+    const title=plain(hit.title);
+    const extract=typeof hit.story_text==='string' ? plain(hit.story_text).slice(0,1000) : '';
+    return [{title,text:extract || 'Solo se verificó el titular: '+title,published:new Date(time).toISOString().slice(0,10),
+      publisher:'Hacker News · compartido',url:'https://news.ycombinator.com/item?id='+hit.objectID}];
+  }).slice(0,8);
+}
+async function devArticles(term:string,after:Date,now:number):Promise<NewsSource[]> {
+  const tag=/router|network|bandwidth|latency|dns|ethernet|tcp|wi-fi|ipv/i.test(term)?'networking':/linux|bash|shell/i.test(term)?'linux':term.toLowerCase().replace(/[^a-z0-9]/g,'');
+  const url=new URL('https://dev.to/api/articles');
+  url.search=new URLSearchParams({tag,per_page:'40'}).toString();
+  const res=await fetch(url,{signal:AbortSignal.timeout(12000)});
+  if(!res.ok)throw new Error('Fuente no disponible');
+  const articles=await res.json();
+  if(!Array.isArray(articles))throw new Error('Fuente no disponible');
+  return articles.flatMap(post=>{
+    const time=Date.parse(post.published_at);
+    if(!Number.isFinite(time) || time<after.getTime() || time>now || typeof post.title!=='string' ||
+        typeof post.description!=='string' || !post.description.trim() || !String(post.url).startsWith('https://dev.to/'))return [];
+    const content=(post.title+' '+post.description+' '+(post.tag_list || []).join(' ')).toLowerCase();
+    if(!term.toLowerCase().split(/\s+/).every(word=>content.includes(word)))return [];
+    return [{title:post.title,text:post.description.slice(0,1000),published:new Date(time).toISOString().slice(0,10),publisher:'DEV Community',url:post.url}];
+  }).slice(0,8);
+}
 async function searchNews(term:string) {
   const now = Date.now(), after = new Date(now - 90*86400000);
-  const results = await Promise.allSettled(publishers.map(async publisher => {
+  const results = await Promise.allSettled([...publishers.map(async publisher => {
     const api = new URL('/wp-json/wp/v2/posts','https://'+publisher.host);
     api.search = new URLSearchParams({search:term,after:after.toISOString(),per_page:'6',
       orderby:'date',order:'desc',_fields:'title,excerpt,link,date_gmt'}).toString();
@@ -49,7 +85,7 @@ async function searchNews(term:string) {
       if(text) sources.push({title:plain(post.title.rendered),text:text.slice(0,1500),published:new Date(published).toISOString().slice(0,10),publisher:publisher.name,url:url.href});
     }
     return sources;
-  }));
+  }),devArticles(term,after,now),communityArticles(term,after,now)]);
   if(results.every(r=>r.status==='rejected')) throw new Error('No se pudo conectar con las fuentes. Comprueba Internet y vuelve a intentar.');
   return results.flatMap(r=>r.status==='fulfilled'?r.value:[]).sort((a,b)=>b.published.localeCompare(a.published));
 }
@@ -97,8 +133,9 @@ async function recommend(profile:Profile,date:string,previous?:PersonalReading):
     attempts.add(plan.search.toLowerCase());
     const sources=(await searchNews(plan.search)).filter(s=>s.url!==previous?.url);
     if(!sources.length)continue;
-  const copy=await askLocal('Elige una publicación que trate directamente el concepto estudiado y pueda entenderse al nivel indicado. Si ninguna encaja, devuelve {}. Explica en español qué novedad presenta según el extracto, relaciónala con el apunte y añade una práctica defensiva sencilla. No inventes detalles, fechas ni enlaces. Devuelve JSON con index (entero de la fuente), title, summary y practice.',{topic:plan.topic,level:plan.level,evidence:plan.evidence,sources:sources.map((s,index)=>({index,title:s.title,text:s.text,published:s.published}))});
-  const source=Number.isInteger(copy.index) && sources[copy.index];
+  const copy=await askLocal('Elige una publicación que trate directamente el concepto estudiado y pueda entenderse al nivel indicado. Si ninguna encaja, devuelve {}. Explica en español qué novedad presenta según el extracto, relaciónala con el apunte y añade una práctica defensiva sencilla. Si solo dispones del titular, di qué tema anuncia y limita el contexto al apunte. No inventes detalles, fechas ni enlaces. Devuelve JSON con index (entero de la fuente), title, summary y practice.',{topic:plan.topic,level:plan.level,evidence:plan.evidence,sources:sources.map((s,index)=>({index,title:s.title,text:s.text,published:s.published}))});
+  const index=copy?.index;
+  const source=(Number.isInteger(index) || (typeof index==='string' && /^\d+$/.test(index))) && sources[Number(index)];
   if(!source)continue;
   const item={date,profileId:profile.id,note:plan.note,evidence:plan.evidence,level:plan.level,topic:plan.topic,title:copy.title,summary:copy.summary,practice:copy.practice,source:source.publisher+' · '+source.published+' · '+source.title,url:source.url};
   if(matchesProfile(item,profile))return item;
