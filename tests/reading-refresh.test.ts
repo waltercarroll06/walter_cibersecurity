@@ -6,7 +6,7 @@ import {mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import type {ViteDevServer} from 'vite';
-import {dailyReader} from '../src/server/daily-reading.ts';
+import {beginnerSource,dailyReader} from '../src/server/daily-reading.ts';
 
 test('la recarga usa los apuntes vigentes y conserva el cupo ante errores, cambios de pestaña y reinicios',async t=>{
   const root=await mkdtemp(join(tmpdir(),'walter-reading-'));
@@ -66,4 +66,10 @@ test('la recarga usa los apuntes vigentes y conserva el cupo ante errores, cambi
   assert.equal(result.data.used,true);
   assert.equal(result.data.item.url,'https://news.ycombinator.com/item?id=12345');
   assert.equal(searches,total);
+});
+
+test('una noticia de routers no exige protocolos ni utilidades ajenos al apunte',()=>{
+  const note='Un router conecta dos redes.';
+  assert(!beginnerSource('Cloud Router BGP flaps','Diagnóstico con gcloud y jq',note));
+  assert(beginnerSource('Cómo funciona un router de casa','Dos equipos conectados a internet',note));
 });

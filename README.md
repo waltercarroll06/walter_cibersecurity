@@ -56,6 +56,8 @@ Las imágenes del proyecto se muestran cuando el archivo está incorporado al pr
 
 El diario toma texto escrito en los borradores de Cisco, los días de Linux y los apuntes publicados por el autor. Descarta las líneas de plantilla y los ejemplos del proyecto. Al usar la app local guarda una muestra de hasta 60 apuntes (hasta 18.000 caracteres útiles por apunte) en `private/perfil-estudio.json`. La tarea de las 08:00 de Bogotá usa esa muestra para investigar un tema ya estudiado y estimar el nivel según una cita concreta. En el diario puedes leer esa cita y el nivel sugerido. Si faltan apuntes, el diario espera. Los guardados anteriores siguen disponibles en ese navegador.
 
+Las lecturas nuevas parten de una idea de tus apuntes y se preparan a nivel de introducción. **Explícamelo más fácil** pide a Ollama otro ejemplo de la lectura visible, incluso después de usar la recarga.
+
 **Actualizar** vuelve a revisar tus apuntes con Gemma y busca publicaciones de los últimos 90 días en Cisco Blogs, Ars Technica y TechCrunch. El diario muestra la fuente y su fecha. Dispones de una recarga manual por edición, que se renueva a las 08:00 de Bogotá. Guardar, abrir la página o recibir la edición automática conserva el cupo. Los intentos sin una lectura pertinente también lo conservan. Solo se envía a los buscadores el término técnico. La edición personalizada requiere el servidor local, Ollama e Internet.
 
 En el editor de un módulo, **Completar módulo** marca sus temas en el plan. El resumen de Cisco sigue en Ollama al cambiar de sección mientras el servidor local está abierto. Un número junto a **Plan de estudio** indica cuántas respuestas quedan por revisar.

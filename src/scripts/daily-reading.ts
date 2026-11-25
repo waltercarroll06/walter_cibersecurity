@@ -27,7 +27,28 @@ function article(target: HTMLElement, item: Reading, archived = false) {
     target.append(why);
   }
 }
+const simple=panel.querySelector<HTMLButtonElement>('#daily-simple')!;
+const explanation=panel.querySelector<HTMLElement>('#daily-explanation')!;
+let explaining='';
+let displayed='';
+simple.addEventListener('click',async()=>{
+  if(!active)return;
+  const key=identity(active);
+  explaining=key;simple.disabled=true;explanation.hidden=false;
+  explanation.textContent='Preparando un ejemplo sencillo…';
+  try{
+    const res=await fetch('/__local-ai/generate',{method:'POST',headers:{'Content-Type':'application/json','X-Walter-Lab':'local'},
+      body:JSON.stringify({action:'reading-simple',title:active.title.slice(0,200),text:JSON.stringify({apunte:active.evidence,lectura:active.summary,tema:active.topic}).slice(0,18000)})});
+    const data=await res.json();
+    if(!res.ok || !data.text)throw new Error(data.error || 'No se pudo preparar el ejemplo.');
+    if(displayed===key)explanation.textContent=data.text;
+  }catch(error){if(displayed===key)explanation.textContent=error instanceof Error?error.message:'No se pudo consultar Ollama.';}
+  finally{if(explaining===key){explaining='';simple.disabled=false;}}
+});
 function render() {
+  const key=active?identity(active):'';
+  if(displayed!==key){displayed=key;explanation.hidden=true;explanation.textContent='';}
+  simple.hidden=!active || panel.dataset.dev!=='true';simple.disabled=!!key && explaining===key;
   if (active) {
     current.hidden = false;
     article(current,active);

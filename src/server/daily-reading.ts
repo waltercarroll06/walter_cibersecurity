@@ -109,11 +109,17 @@ export function readingTopics(notes:Profile['notes']){
   }
   return topics;
 }
+export function beginnerSource(title:string, excerpt:string, evidence:string){
+  // Skip articles that need specialist tools or protocols absent from the student's note.
+  const advanced=/\b(?:BGP|OSPF|VXLAN|eBPF|Kubernetes|gcloud|jq|Terraform|MPLS|IPsec|SIEM|XDR|CVE-\d{4}-\d+)\b/gi;
+  const known=new Set((evidence.match(advanced) ?? []).map(term=>term.toLowerCase()));
+  return ((title+' '+excerpt).match(advanced) ?? []).every(term=>known.has(term.toLowerCase()));
+}
 async function recommend(profile:Profile,date:string,previous?:PersonalReading):Promise<PersonalReading> {
   const start=Math.floor(Date.parse(date)/86400000)%profile.notes.length;
   const notes=[...profile.notes.slice(start),...profile.notes.slice(0,start)].slice(0,12);
   const suggestions=readingTopics(notes);
-  const proposal=await askLocal('Selecciona un concepto trabajado en los apuntes. Devuelve JSON: note (etiqueta), evidence (frase textual), topic (tema en español), search (término técnico público en inglés), level (Introducción, Práctica guiada o Profundización). No uses nombres personales, direcciones ni texto privado como consulta de búsqueda.',notes.map(n=>({...n,text:n.text.length<=1600?n.text:n.text.slice(0,800)+'\n…\n'+n.text.slice(-800)}))).catch(error=>{if(error instanceof SyntaxError)return {};throw error;});
+  const proposal=await askLocal('Selecciona un concepto trabajado en los apuntes. Devuelve JSON: note (etiqueta), evidence (frase textual), topic (tema en español), search (término técnico público en inglés), level (Introducción). Parte de lo que el alumno explica con sus palabras; prioriza una duda básica. No uses nombres personales, direcciones ni texto privado como consulta de búsqueda.',notes.map(n=>({...n,text:n.text.length<=1600?n.text:n.text.slice(0,800)+'\n…\n'+n.text.slice(-800)}))).catch(error=>{if(error instanceof SyntaxError)return {};throw error;});
   const fold=(text:string)=>text.normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/\s+/g,' ').trim();
   if(typeof proposal?.evidence==='string' && proposal.evidence.trim() && typeof proposal.search==='string' && typeof proposal.topic==='string'){
     const quote=fold(proposal.evidence.replace(/^[“«"]|[”»"]$/g,''));
@@ -121,7 +127,7 @@ async function recommend(profile:Profile,date:string,previous?:PersonalReading):
     const evidence=note && (note.text.includes(proposal.evidence)?proposal.evidence:note.text.split('\n').find(line=>fold(line).includes(quote)));
     const search=proposal.search.trim();
     if(note && evidence && /^[a-z][a-z0-9-]{0,25}(?: [a-z0-9-]{1,26}){0,2}$/i.test(search)){
-      suggestions.unshift({note:note.label,evidence,search,topic:proposal.topic,level:['Práctica guiada','Profundización'].includes(proposal.level)?proposal.level:'Introducción'});
+      suggestions.unshift({note:note.label,evidence,search,topic:proposal.topic,level:'Introducción'});
     }
   }
   if(!suggestions.length)throw new Error('No encontré un concepto que pueda relacionar con tus notas. Añade un ejemplo de lo que estudiaste.');
@@ -131,9 +137,9 @@ async function recommend(profile:Profile,date:string,previous?:PersonalReading):
     if(attempts.has(plan.search.toLowerCase()))continue;
     if(attempts.size===3)break;
     attempts.add(plan.search.toLowerCase());
-    const sources=(await searchNews(plan.search)).filter(s=>s.url!==previous?.url);
+    const sources=(await searchNews(plan.search)).filter(s=>s.url!==previous?.url && beginnerSource(s.title,s.text,plan.evidence)).slice(0,8);
     if(!sources.length)continue;
-  const copy=await askLocal('Elige una publicación que trate directamente el concepto estudiado y pueda entenderse al nivel indicado. Si ninguna encaja, devuelve {}. Explica en español qué novedad presenta según el extracto, relaciónala con el apunte y añade una práctica defensiva sencilla. Si solo dispones del titular, di qué tema anuncia y limita el contexto al apunte. No inventes detalles, fechas ni enlaces. Devuelve JSON con index (entero de la fuente), title, summary y practice.',{topic:plan.topic,level:plan.level,evidence:plan.evidence,sources:sources.map((s,index)=>({index,title:s.title,text:s.text,published:s.published}))});
+  const copy=await askLocal('Escribes para Walter, que está empezando. Usa la cita de su apunte como punto de partida. Elige una publicación que pueda entender desde esa idea. Descarta tutoriales para profesionales y fuentes que exijan conocimientos previos ajenos a la cita. Si ninguna encaja, devuelve {}. Escribe un título cotidiano en español. En summary usa hasta 80 palabras: empieza con lo conocido, explica una sola novedad y da un ejemplo concreto, como dos equipos de casa. Introduce como máximo un término nuevo y explica su significado en la misma frase. En practice plantea una pregunta sencilla que pueda responder con la lectura, sin instalar nada ni usar herramientas nuevas. Si solo dispones del titular, di qué tema anuncia y limita el contexto al apunte. No inventes detalles, fechas ni enlaces. Devuelve JSON con index (entero de la fuente), title, summary y practice.',{topic:plan.topic,level:plan.level,evidence:plan.evidence,sources:sources.map((s,index)=>({index,title:s.title,text:s.text,published:s.published}))});
   const index=copy?.index;
   const source=(Number.isInteger(index) || (typeof index==='string' && /^\d+$/.test(index))) && sources[Number(index)];
   if(!source)continue;
