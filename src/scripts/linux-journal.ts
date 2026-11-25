@@ -65,6 +65,7 @@ function renderDays() {
 
 function openDay(day: number) {
   activeDay = day;
+  sessionStorage.setItem(keyPrefix+'open',String(day));
   dayInput.value = String(day);
   heading.textContent = `Día ${day}`;
   const note = notes.get(day);
@@ -110,3 +111,12 @@ download.addEventListener('click', () => {
 });
 
 renderDays();
+
+const requestedDay=Number(new URLSearchParams(location.search).get('dia') || sessionStorage.getItem(keyPrefix+'open'));
+if(isDay(requestedDay))openDay(requestedDay);
+const pos=new URLSearchParams(location.search).get('pos');
+if(pos!==null && /^\d+$/.test(pos)){
+  const start=Math.min(Number(pos),body.value.length);
+  const end=body.value.indexOf('\n',start);
+  body.focus();body.setSelectionRange(start,end<0?body.value.length:end);body.scrollIntoView({block:'center'});
+}

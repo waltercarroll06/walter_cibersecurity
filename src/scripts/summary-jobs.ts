@@ -16,10 +16,10 @@ export function discardJob(module:string){
   document.dispatchEvent(new Event('summary-change'));
 }
 function headers(id:string){return {'X-Walter-Lab':'local','X-Walter-Job':id};}
-export async function startSummary(module:string,title:string,text:string){
+export async function startSummary(module:string,title:string,text:string,action:'summary'|'linux-summary'|'linux-command'|'reading-simple'='summary'){
   const job:SummaryJob={id:crypto.randomUUID(),module,state:'pending',started:Date.now()};
   saveJob(job);
-  const body=JSON.stringify({action:'summary',title,text});
+  const body=JSON.stringify({action,title,text});
   try{
     const res=await fetch('/__local-ai/generate',{method:'POST',headers:{...headers(job.id),'Content-Type':'application/json'},body,keepalive:new Blob([body]).size<64000});
     if(!res.ok && currentJob(module)?.id===job.id){
@@ -45,7 +45,7 @@ async function poll(){
   }catch{/* Reconnect on the next poll. */}finally{checking=false;}
 }
 function navigation(){
-  const unread=jobs().filter(j=>j.unread && j.state==='ready');
+  const unread=jobs().filter(j=>j.unread && j.state==='ready' && !j.module.startsWith('linux:') && !j.module.startsWith('reading:'));
   const badge=document.querySelector<HTMLElement>('#summary-badge');
   if(badge){badge.hidden=!unread.length;badge.textContent=String(unread.length);}
   const list=document.querySelector('#summary-inbox');

@@ -1,6 +1,15 @@
 ---
+import {courseModules} from '../../data/course';
 import DailyReading from '../../components/DailyReading.astro';
 import Layout from '../../layouts/Layout.astro';
 import { withBase } from '../../lib/content';
 ---
-<Layout title="Diario de estudio" active="diario"><div class="page-heading"><div><p class="eyebrow">APRENDER Y DEJAR HUELLA</p><h1>Diario de estudio</h1><p>Ideas, comandos, dudas y pequeñas conexiones de cada sesión.</p></div><div class="button-row"><a class="button primary" href={withBase('nuevo/')}>Escribir mis apuntes</a><a class="button secondary" href={withBase('roadmap/')}>Actualizar mi plan de estudio</a></div></div><DailyReading /></Layout>
+<Layout title="Diario de estudio" active="diario"><div class="page-heading"><div><p class="eyebrow">APRENDER Y DEJAR HUELLA</p><h1>Diario de estudio</h1><p>Ideas, comandos, dudas y pequeñas conexiones de cada sesión.</p></div><div class="button-row"><a class="button secondary" href={withBase('roadmap/')}>Actualizar mi plan de estudio</a></div></div><section class="entry-card"><label for="diary-module">Mi módulo de Cisco</label><select id="diary-module">{courseModules.map(m=><option value={m.id}>Módulo {m.number} · {m.title}</option>)}</select><div class="button-row"><button class="button secondary" id="diary-complete" type="button">Completar módulo</button></div><p id="diary-progress" role="status"></p></section><DailyReading />
+<script>
+  import {courseModules} from '../../data/course';
+  import {moduleCompletion} from '../../scripts/module-completion';
+  const select=document.querySelector<HTMLSelectElement>('#diary-module')!;
+  const status=document.querySelector<HTMLElement>('#diary-progress')!;
+  const refresh=moduleCompletion(document.querySelector<HTMLButtonElement>('#diary-complete')!,()=>courseModules[select.selectedIndex],status);
+  select.addEventListener('change',()=>{status.textContent='';refresh();});
+</script></Layout>

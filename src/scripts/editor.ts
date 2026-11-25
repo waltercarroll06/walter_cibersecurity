@@ -80,3 +80,10 @@ document.querySelector('#copy-markdown')?.addEventListener('click', async () => 
 });
 
 if(selectedModule)moduleCompletion(document.querySelector<HTMLButtonElement>('#complete-module')!,()=>selectedModule,status);
+
+const pos=new URLSearchParams(location.search).get('pos');
+if(pos!==null && /^\d+$/.test(pos)){
+  const start=Math.min(Number(pos),body.value.length);
+  const end=body.value.indexOf('\n',start);
+  body.focus();body.setSelectionRange(start,end<0?body.value.length:end);body.scrollIntoView({block:'center'});
+}

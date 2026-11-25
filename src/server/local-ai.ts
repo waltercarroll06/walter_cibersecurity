@@ -113,7 +113,7 @@ export function localTutor(): Plugin {
         busy = true;
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 180000);
-        const detached=input.action==='summary' && validId;
+        const detached=input.action!=='objectives' && validId;
         const job:Job={state:'pending',controller};
         if(detached){
           if(jobs.size>=64)jobs.delete(jobs.keys().next().value!);

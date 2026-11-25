@@ -31,14 +31,14 @@ document.querySelectorAll<HTMLInputElement>('[data-module-toggle]').forEach(togg
 const data = (): Progress => ({ version: 1, completed: [...completed], updatedAt: new Date().toISOString() });
 const save = () => {
   try { localStorage.setItem(key, JSON.stringify(data())); status.textContent = 'Progreso guardado en este navegador.'; }
-  catch { status.textContent = 'No se pudo guardar en este navegador. Exporta un respaldo antes de salir.'; }
+  catch { status.textContent = 'No se pudo guardar en este navegador.'; }
 };
 function restoreProgress(){
   try {
     const raw=localStorage.getItem(key);
     completed=new Set(raw?parseProgress(raw,ids).completed:[]);
     update();
-  }catch{status.textContent='No se pudo leer el progreso guardado. Puedes importar un respaldo.';}
+  }catch{status.textContent='No se pudo leer el progreso guardado.';}
 }
 restoreProgress();
 window.addEventListener('pageshow',restoreProgress);
@@ -46,22 +46,6 @@ inputs.forEach(input => input.addEventListener('change', () => {
   input.checked ? completed.add(input.dataset.task!) : completed.delete(input.dataset.task!);
   update(); save();
 }));
-document.querySelector('#export-progress')?.addEventListener('click', () => {
-  const url = URL.createObjectURL(new Blob([JSON.stringify(data(), null, 2)], { type: 'application/json' }));
-  const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'walter-cisco-redes.json'; anchor.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-  status.textContent = 'Respaldo preparado para descargar.';
-});
-document.querySelector<HTMLInputElement>('#import-progress')?.addEventListener('change', async event => {
-  const input = event.target as HTMLInputElement;
-  const file = input.files?.[0]; if (!file) return;
-  try {
-    if (file.size > 100_000) throw new Error('El archivo es demasiado grande para ser un respaldo.');
-    const progress = parseProgress(await file.text(), ids);
-    completed = new Set(progress.completed); update(); save();
-  } catch (error) { status.textContent = error instanceof Error ? error.message : 'No se pudo importar el archivo.'; }
-  input.value = '';
-});
 window.addEventListener('storage', event => {
   if (event.key !== key && event.key !== null) return;
   try { completed = new Set(event.newValue ? parseProgress(event.newValue, ids).completed : []); update(); }

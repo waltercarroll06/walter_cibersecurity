@@ -1,3 +1,4 @@
+import {jobs,currentJob,startSummary} from './summary-jobs';
 import { syncStudyNotes } from './study-sync';
 import { validReading, editionDate, type Reading, type PersonalReading } from '../lib/daily-reading';
 const panel = document.querySelector<HTMLElement>('#daily')!;
@@ -29,26 +30,19 @@ function article(target: HTMLElement, item: Reading, archived = false) {
 }
 const simple=panel.querySelector<HTMLButtonElement>('#daily-simple')!;
 const explanation=panel.querySelector<HTMLElement>('#daily-explanation')!;
-let explaining='';
-let displayed='';
-simple.addEventListener('click',async()=>{
-  if(!active)return;
-  const key=identity(active);
-  explaining=key;simple.disabled=true;explanation.hidden=false;
-  explanation.textContent='Preparando un ejemplo sencillo…';
-  try{
-    const res=await fetch('/__local-ai/generate',{method:'POST',headers:{'Content-Type':'application/json','X-Walter-Lab':'local'},
-      body:JSON.stringify({action:'reading-simple',title:active.title.slice(0,200),text:JSON.stringify({apunte:active.evidence,lectura:active.summary,tema:active.topic}).slice(0,18000)})});
-    const data=await res.json();
-    if(!res.ok || !data.text)throw new Error(data.error || 'No se pudo preparar el ejemplo.');
-    if(displayed===key)explanation.textContent=data.text;
-  }catch(error){if(displayed===key)explanation.textContent=error instanceof Error?error.message:'No se pudo consultar Ollama.';}
-  finally{if(explaining===key){explaining='';simple.disabled=false;}}
+function simpleState(){
+  const job=active?currentJob('reading:'+identity(active)):undefined;
+  simple.hidden=!active || panel.dataset.dev!=='true';
+  simple.disabled=jobs().some(j=>j.state==='pending');
+  explanation.hidden=!job;
+  explanation.textContent=job?.state==='pending'?'Preparando el ejemplo. Puedes cambiar de sección.':job?.text || '';
+}
+simple.addEventListener('click',()=>{
+  if(active)void startSummary('reading:'+identity(active),active.title.slice(0,200),JSON.stringify({apunte:active.evidence,lectura:active.summary,tema:active.topic}).slice(0,18000),'reading-simple');
 });
-function render() {
-  const key=active?identity(active):'';
-  if(displayed!==key){displayed=key;explanation.hidden=true;explanation.textContent='';}
-  simple.hidden=!active || panel.dataset.dev!=='true';simple.disabled=!!key && explaining===key;
+document.addEventListener('summary-change',simpleState);
+function render(){
+  simpleState();
   if (active) {
     current.hidden = false;
     article(current,active);
@@ -80,9 +74,10 @@ function restore() {
 let loading=false;
 let usedEdition='';
 let empty=false;
+let pending=false;
 let failedMessage='';
 function refreshState(){
-  refresh.disabled=loading || usedEdition===editionDate(new Date()) || panel.dataset.dev!=='true';
+  refresh.disabled=loading || pending || usedEdition===editionDate(new Date()) || panel.dataset.dev!=='true';
 }
 async function update(manual=false) {
   if(loading)return;
@@ -93,16 +88,17 @@ async function update(manual=false) {
     if(manual){
       refresh.textContent='Buscando…';
       status.textContent='Revisando tus apuntes y buscando novedades…';
-      await syncStudyNotes(true);
+      if(!id || id==='error')await syncStudyNotes(true);
       id=profileId();
     }
     if(!id || id==='error'){status.textContent=id==='error'?'No se pudieron sincronizar tus apuntes. Pulsa Actualizar para volver a intentar.':'Comprobando tus apuntes…';return;}
     const response=await fetch('/__daily-reading?profile='+encodeURIComponent(id),manual
-      ? {method:'POST',headers:{'X-Walter-Lab':'local'},cache:'no-store'}
+      ? {method:'POST',headers:{'X-Walter-Lab':'local',Prefer:'respond-async'},keepalive:true,cache:'no-store'}
       : {cache:'no-store'});
     const result=await response.json();
     if(id!==profileId())return;
     if(!response.ok)throw new Error(result.error || 'No se pudo consultar el diario.');
+    pending=result.pending===true;
     empty=result.empty===true;
     usedEdition=result.used ? result.edition : '';
     if(validReading(result.item) && result.item.date<=editionDate(new Date())){
@@ -111,15 +107,15 @@ async function update(manual=false) {
     }
     render();
     if(result.used || manual)failedMessage='';
-    status.textContent=result.used?'Ya usaste tu recarga. Tendrás otra a las 8:00 a. m. de Colombia.'
+    status.textContent=pending?'Buscando tu lectura. Puedes salir del diario y volver.':result.error || (result.used?'Usaste las dos recargas. Se renuevan a las 8:00 a. m. de Colombia.'
       :empty?'Escribe un apunte con tus propias palabras para buscar una lectura relacionada.'
-      :failedMessage || 'Tienes una recarga disponible.';
+      :failedMessage || (result.remaining===1?'Te queda una recarga.':'Tienes dos recargas disponibles.'));
   }catch(error){
     const message=error instanceof Error?error.message:'No se pudo actualizar el diario.';
     if(manual)failedMessage=message;
     status.textContent=message;
   }finally{
-    loading=false;refresh.textContent='Actualizar';refreshState();
+    loading=false;refresh.textContent=pending?'Buscando…':'Actualizar';refreshState();
     if(id!==profileId())void update();
   }
 }
@@ -136,3 +132,6 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) void
 setInterval(() => { if (!document.hidden) void update(); },60_000);
 document.addEventListener('study-profile-ready',()=>{restore();void update();});
 restore(); void update();
+
+setInterval(()=>{if(pending && !document.hidden)void update();},1500);
+window.addEventListener('pageshow',()=>void update());

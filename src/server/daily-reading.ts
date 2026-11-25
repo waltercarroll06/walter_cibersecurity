@@ -116,6 +116,28 @@ export function beginnerSource(title:string, excerpt:string, evidence:string){
   return ((title+' '+excerpt).match(advanced) ?? []).every(term=>known.has(term.toLowerCase()));
 }
 async function recommend(profile:Profile,date:string,previous?:PersonalReading):Promise<PersonalReading> {
+  const linux=profile.notes.filter(n=>/^Linux\b/i.test(n.label));
+  if(linux.length){
+    const tips=[
+      ['pwd','¿En qué carpeta estoy?','Antes de buscar un archivo, escribe pwd. La terminal te muestra la ruta de la carpeta en la que estás trabajando.','Escribe pwd y localiza el nombre de tu carpeta en la última parte de la ruta.'],
+      ['ls','Mira lo que hay en tu carpeta','Escribe ls para ver los nombres de los archivos y carpetas del directorio actual. Puedes mirar su contenido sin cambiar nada.','Ejecuta ls. Si aparece algún nombre, compáralo con lo que ves en el explorador.'],
+      ['echo','Prueba una frase en la terminal','Con echo puedes mostrar un mensaje. Por ejemplo, echo "Hola Walter" escribe esas palabras en la pantalla.','Cambia el saludo y predice qué verás antes de pulsar Enter.'],
+      ['date','Consulta la hora de Linux','El comando date, escrito solo, muestra la fecha y la hora del sistema.','Escribe date y compara la hora que aparece con la de tu equipo.'],
+      ['whoami','Averigua qué usuario estás usando','Escribe whoami para ver el nombre del usuario con el que estás ejecutando comandos. Es útil cuando tienes varias terminales abiertas.','Prueba whoami y busca ese mismo nombre al inicio de la línea de tu terminal.']
+    ];
+    const start=Math.floor(Date.parse(date)/86400000)%tips.length;
+    const choices=[...tips.slice(start),...tips.slice(0,start)].map(tip=>{
+      const note=linux.find(n=>n.text.toLowerCase().split(/\W+/).includes(tip[0]));
+      return {tip,note,url:'https://www.gnu.org/software/coreutils/manual/html_node/'+tip[0]+'-invocation.html'};
+    });
+    const ordered=choices.sort((a,b)=>Number(!!b.note)-Number(!!a.note));
+    const last=ordered.findIndex(c=>c.url===previous?.url);
+    const {tip,note,url}=ordered[(last+1)%ordered.length];
+    const anchor=note ?? linux[0];
+    const lines=anchor.text.split('\n').map(l=>l.trim()).filter(Boolean);
+    const evidence=(lines.find(l=>l.toLowerCase().includes(tip[0])) ?? lines[0]).slice(0,160);
+    return {date,profileId:profile.id,note:anchor.label,evidence,level:'Introducción',topic:'Consejo de Linux',title:tip[1],summary:tip[2],practice:tip[3],source:'Manual de GNU · '+tip[0],url};
+  }
   const start=Math.floor(Date.parse(date)/86400000)%profile.notes.length;
   const notes=[...profile.notes.slice(start),...profile.notes.slice(0,start)].slice(0,12);
   const suggestions=readingTopics(notes);
@@ -153,23 +175,24 @@ export function dailyReader():Plugin {
     const dir=resolve(server.config.root,'private');
     const profilePath=resolve(dir,'perfil-estudio.json');
     const scheduled=resolve(dir,'lectura-del-dia.json'),local=resolve(dir,'lectura-local.json');
-    const manualFile=(date:string)=>resolve(dir,'lectura-manual-'+date+'.json');
+    const manualFile=(date:string,slot=1)=>resolve(dir,'lectura-manual-'+date+(slot===2?'-2':'')+'.json');
+    let failure='';
     let manualBusy=false, autoBusy=false, retryAt=0;
     async function newest(profile:Profile,today:string) {
-      const days=(await readdir(dir)).filter(n=>/^lectura-manual-\d{4}-\d{2}-\d{2}\.json$/.test(n)).sort().reverse();
+      const days=(await readdir(dir)).filter(n=>/^lectura-manual-\d{4}-\d{2}-\d{2}(?:-2)?\.json$/.test(n)).sort((a,b)=>b.slice(0,-5).localeCompare(a.slice(0,-5)));
       const manual=days.length ? await readJson(resolve(dir,days[0])) : undefined;
       const items=[manual,await readJson(scheduled),await readJson(local)];
       // Keep the last visible edition when the user adds notes before the next search.
       return items.filter(r=>validReading(r) && r.date<=today && (matchesProfile(r,profile) || ('profileId' in r && 'evidence' in r && typeof r.profileId==='string' && typeof r.evidence==='string'))).sort((a,b)=>b.date.localeCompare(a.date))[0] as PersonalReading|undefined;
     }
-    async function publishManual(item:PersonalReading) {
+    async function publishManual(item:PersonalReading,slot:number) {
       const temp=resolve(dir,randomUUID()+'.tmp');
       await writeFile(temp,JSON.stringify(item),'utf8');
-      try { await link(temp,manualFile(item.date)); }
+      try { await link(temp,manualFile(item.date,slot)); }
       catch(error){if((error as NodeJS.ErrnoException).code!=='EEXIST') throw error;}
       finally{await unlink(temp);}
       for(const file of await readdir(dir)) {
-        if(/^lectura-manual-\d{4}-\d{2}-\d{2}\.json$/.test(file) && file<'lectura-manual-'+item.date+'.json') await unlink(resolve(dir,file)).catch(()=>{});
+        if(/^lectura-manual-\d{4}-\d{2}-\d{2}(?:-2)?\.json$/.test(file) && file.slice('lectura-manual-'.length,'lectura-manual-'.length+10)<item.date) await unlink(resolve(dir,file)).catch(()=>{});
       }
     }
     server.middlewares.use(async(req,res,next)=>{
@@ -206,19 +229,25 @@ export function dailyReader():Plugin {
         if(!profile || profile.id!==url.searchParams.get('profile'))return send(409,{});
         const today=editionDate(new Date());
         const item=await newest(profile,today);
-        const state=async()=>({item,used:!!(await readJson(manualFile(today))),empty:!profile.notes.length,edition:today});
-        if(!post || !profile.notes.length || await readJson(manualFile(today)))return send(200,await state());
-        if(manualBusy)return send(409,{error:'Ya hay una búsqueda en curso.'});
-        manualBusy=true;
-        try {
-          const reading=await recommend(profile,today,item);
-          if((await readJson(profilePath))?.id!==profile.id || editionDate(new Date())!==today) return send(409,{error:'Tus apuntes o la edición cambiaron. Pulsa Actualizar de nuevo.'});
-          await publishManual(reading);
-          return send(200,{item:await readJson(manualFile(today)),edition:today,used:true,empty:false});
-        }catch(error){
-          const message=error instanceof Error && /^(Ollama|No encontré|No se pudo conectar)/.test(error.message)?error.message:'No se pudo preparar la lectura. Comprueba que Ollama esté abierto y que tengas Internet.';
-          return send(503,{error:message+' Tu recarga sigue disponible.'});
-        }finally{manualBusy=false;}
+        const count=await readJson(manualFile(today,2))?2:await readJson(manualFile(today))?1:0;
+        const state={item,used:count===2,remaining:2-count,pending:manualBusy,error:failure,empty:!profile.notes.length,edition:today};
+        if(!post || !profile.notes.length || count>=2 || manualBusy)return send(200,state);
+        manualBusy=true;failure='';
+        const run=async()=>{
+          try{
+            const reading=await recommend(profile,today,item);
+            if(editionDate(new Date())!==today)throw new Error('La edición cambió. Vuelve a actualizar.');
+            await publishManual(reading,count+1);
+            return {status:200,data:{item:await readJson(manualFile(today,count+1)),remaining:1-count,edition:today,used:count===1,empty:false,pending:false}};
+          }catch(error){
+            failure=(error instanceof Error?error.message:'No se pudo preparar la lectura.')+' Conservas tu recarga.';
+            return {status:503,data:{error:failure}};
+          }finally{manualBusy=false;}
+        };
+        const work=run();
+        if(req.headers.prefer==='respond-async')return send(202,{...state,pending:true,error:''});
+        const result=await work;
+        return send(result.status,result.data);
       }catch{return send(500,{error:'No se pudo cargar la lectura.'});}
     });
     // The scheduled edition and manual refresh have independent allowances.

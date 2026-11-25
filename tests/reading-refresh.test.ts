@@ -41,11 +41,11 @@ test('la recarga usa los apuntes vigentes y conserva el cupo ante errores, cambi
     if(typeof plugin.configureServer==='function') Reflect.apply(plugin.configureServer,plugin,[{
       config:{root,logger:{warn(){}}},httpServer:close,middlewares:{use(fn:Handler){handle=fn;}}
     } as unknown as ViteDevServer]);
-    return async(path:string,method='GET',body?:unknown)=>{
-      const req=Object.assign(Readable.from(body?[Buffer.from(JSON.stringify(body))]:[]),{method,url:path,headers:{host:'localhost',origin:'http://localhost','x-walter-lab':'local','content-type':'application/json'},socket:{remoteAddress:'127.0.0.1'}});
+    return async(path:string,method='GET',body?:unknown,background=false)=>{
+      const req=Object.assign(Readable.from(body?[Buffer.from(JSON.stringify(body))]:[]),{method,url:path,headers:{prefer:background?'respond-async':'',host:'localhost',origin:'http://localhost','x-walter-lab':'local','content-type':'application/json'},socket:{remoteAddress:'127.0.0.1'}});
       let status=0,result;
       await handle(req,{writeHead(code:number){status=code;},end(json:string){result=JSON.parse(json);}},()=>assert.fail('ruta inesperada'));
-      return {status,data:result as unknown as {profileId:string;used:boolean;item:{url:string};empty:boolean}};
+      return {status,data:result as unknown as {profileId:string;remaining:number;pending:boolean;used:boolean;item:{url:string};empty:boolean}};
     };
   }
   const request=open();
@@ -58,13 +58,23 @@ test('la recarga usa los apuntes vigentes y conserva el cupo ante errores, cambi
   assert.equal((await request(first,'POST')).status,503);
   assert.equal((await request(first)).data.used,false);
   newsAvailable=true;
-  const [left,right]=await Promise.all([request(first,'POST'),request(first,'POST')]);
-  assert([left,right].some(r=>r.data.used));
-  const total=searches;
-  const revised=url((await put('Otra duda sobre routers.')).data.profileId);
+  const start=await request(first,'POST',undefined,true);
+  assert.equal(start.status,202);
+  assert.equal(start.data.pending,true);
+  let state=await request(first);
+  for(let i=0;state.data.pending && i<100;i++){
+    await new Promise(resolve=>setTimeout(resolve,5));state=await request(first);
+  }
+  assert.equal(state.data.remaining,1);
+  const other=await request('/__study-notes','POST',[{label:'Linux · día 1',text:'Hoy utilicé echo para mostrar un saludo.'}]);
+  const revised=url(other.data.profileId);
   const result=await open()(revised,'POST');
+  assert.equal(result.data.remaining,0);
   assert.equal(result.data.used,true);
-  assert.equal(result.data.item.url,'https://news.ycombinator.com/item?id=12345');
+  assert.match(result.data.item.url,/gnu\.org/);
+  const total=searches;
+  const again=await open()(revised,'POST');
+  assert.equal(again.data.item.url,result.data.item.url);
   assert.equal(searches,total);
 });
 
