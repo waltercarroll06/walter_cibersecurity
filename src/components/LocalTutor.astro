@@ -1,3 +1,6 @@
+---
+import TutorFollowUp from './TutorFollowUp.astro';
+---
 <section class="tutor-panel" aria-labelledby="tutor-title" data-dev={import.meta.env.DEV ? 'true' : 'false'}>
   <div class="section-heading"><div><p class="eyebrow">TU COMPAÑERO DE ESTUDIO</p><h2 id="tutor-title">Tutor IA local</h2></div><button type="button" class="button secondary" id="ai-connect">Comprobar conexión</button></div>
   <p id="ai-connection" role="status">Comprobando Ollama…</p>
@@ -5,7 +8,7 @@
   <div class="tutor-input"><label for="ai-image">Captura de los objetivos · PNG, JPEG o WebP · hasta 5 MB</label><input type="file" id="ai-image" accept="image/png,image/jpeg,image/webp" /><img id="ai-image-preview" hidden alt="Captura seleccionada para consultar los objetivos" /></div>
   <div class="button-row"><button type="button" class="button secondary" id="ai-objectives" disabled>Leer objetivos de la foto</button><button type="button" class="button primary" id="ai-summary" disabled>Resumir mis apuntes</button><button type="button" class="button secondary" id="ai-cancel" hidden>Cancelar consulta</button></div>
   <p id="ai-status" class="status-message" role="status" aria-live="polite"></p>
-  <div id="ai-result-panel" hidden><label for="ai-result">Respuesta para revisar y editar</label><textarea id="ai-result" rows="12"></textarea><div class="button-row"><button type="button" id="ai-add" class="button primary">Añadir al final de mis apuntes</button><button type="button" id="ai-download" class="button secondary">Descargar respuesta</button></div><p class="small muted">Tus notas originales se conservan. Descarga la respuesta si quieres guardarla sin añadirla al módulo.</p></div>
+  <div id="ai-result-panel" hidden><label for="ai-result">Respuesta para revisar y editar</label><textarea id="ai-result" rows="12"></textarea><div class="button-row"><button type="button" id="ai-add" class="button primary">Añadir al final de mis apuntes</button><button type="button" id="ai-download" class="button secondary">Descargar respuesta</button></div><p class="small muted">Tus notas originales se conservan. Descarga la respuesta si quieres guardarla sin añadirla al módulo.</p><TutorFollowUp /></div>
 </section>
 <style>.tutor-panel{padding:26px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);margin:30px 0}.tutor-panel>p{margin-bottom:16px}.tutor-input{margin:20px 0}.tutor-input input{display:block;max-width:100%}#ai-image-preview{max-width:100%;max-height:230px;object-fit:contain;margin-top:15px;border-radius:8px}#ai-result-panel .button-row{margin:15px 0}.tutor-panel button:disabled{opacity:.5;cursor:not-allowed}</style>
 <script src="../scripts/local-tutor.ts"></script>
