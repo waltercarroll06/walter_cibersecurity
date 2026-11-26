@@ -1,0 +1,47 @@
+<section class="entry-card" id="study-review">
+  <h2>Mis dudas para repasar</h2>
+  <p data-question></p>
+  <div data-controls hidden>
+    <label>Mi respuesta<textarea rows="3" maxlength="4000"></textarea></label>
+    <div class="button-row">
+      <button class="button secondary" type="button" data-hint>Ver pista</button>
+      <button class="button secondary" type="button" data-later>Dejar para mañana</button>
+      <button class="button primary" type="button" data-done>Ya puedo explicarlo</button>
+    </div><p data-context hidden></p>
+  </div><p role="status"></p>
+</section>
+<script>
+  import {reviews,saveReviews} from '../lib/study-review';
+  const panel=document.querySelector('#study-review')!;
+  const field=panel.querySelector('textarea')!;
+  const hint=panel.querySelector<HTMLElement>('[data-context]')!;
+  const status=panel.querySelector('[role=status]')!;
+  let current='';
+  function render() {
+    try {
+      const item=reviews().find(item=>!item.done && item.after<=Date.now());
+      current=item?.question ?? '';
+      panel.querySelector('[data-question]')!.textContent=current || 'Cuando tengas una duda, guárdala desde el tutor de Cisco o Linux.';
+      panel.querySelector<HTMLElement>('[data-controls]')!.hidden=!item;
+      field.value=item?.answer ?? ''; hint.textContent=item?.hint ?? ''; hint.hidden=true;
+    } catch {status.textContent='No se pudieron leer las dudas del navegador.';}
+  }
+  function update(action:string) {
+    try {
+      const items=reviews();
+      const item=items.find(i=>i.question===current && !i.done);
+      if(!item) {render();return;}
+      item.answer=field.value;
+      if(action==='done') item.done=true;
+      if(action==='later') {const next=new Date();next.setHours(24,0,0,0);item.after=next.getTime();}
+      saveReviews(items);
+      if(action!=='edit') {render();status.textContent=action==='later'?'La duda volverá mañana.':'Duda marcada como resuelta.';}
+    } catch {status.textContent='El navegador no pudo guardar el cambio.';}
+  }
+  field.addEventListener('input',()=>update('edit'));
+  panel.querySelector('[data-hint]')!.addEventListener('click',()=>{hint.hidden=false;});
+  panel.querySelector('[data-later]')!.addEventListener('click',()=>update('later'));
+  panel.querySelector('[data-done]')!.addEventListener('click',()=>update('done'));
+  window.addEventListener('pageshow',render);
+  render();
+</script>
