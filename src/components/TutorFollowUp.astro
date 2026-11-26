@@ -1,0 +1,66 @@
+---
+const { linux = false } = Astro.props;
+---
+<study-follow-up data-linux={String(linux)}>
+  <label>Tu duda<textarea rows="2" maxlength="1500" placeholder="¿Qué parte quieres aclarar?"></textarea></label>
+  <div class="button-row">
+    <button class="button secondary" type="button" data-ask>Preguntar</button>
+    <button class="button secondary" type="button" data-simple>Explícamelo más fácil</button>
+    <button class="button secondary" type="button" data-save>Repasar en el diario</button>
+  </div>
+  <p role="status"></p><p data-reply style="white-space:pre-wrap"></p>
+</study-follow-up>
+<script>
+  import { reviews, saveReviews } from '../lib/study-review';
+  class StudyFollowUp extends HTMLElement {
+    connectedCallback() {
+      const field = this.querySelector('textarea')!;
+      const status = this.querySelector('[role=status]')!;
+      const reply = this.querySelector('[data-reply]')!;
+      const linux = this.dataset.linux === 'true';
+      const output = document.querySelector(linux ? '#linux-answer-text' : '#ai-result')!;
+      const value = (el: Element | null) => el instanceof HTMLTextAreaElement ? el.value : el?.textContent ?? '';
+      const context = () => value(output);
+      let pending = false;
+      let generation = 0;
+      const reset = () => { generation++; reply.textContent = ''; field.value = ''; status.textContent = ''; };
+      const observer = new MutationObserver(reset);
+      observer.observe(output.parentElement!, {attributes:true,attributeFilter:['hidden']});
+      if (linux) observer.observe(output, {childList:true,subtree:true,characterData:true});
+      else output.addEventListener('input',reset);
+      this.addEventListener('click', async event => {
+        const button = event.target;
+        if (!(button instanceof HTMLButtonElement)) return;
+        const question = field.value.trim();
+        if (!question && !button.hasAttribute('data-simple')) {
+          status.textContent = 'Escribe la duda que quieres preguntar o repasar.'; field.focus(); return;
+        }
+        if (button.hasAttribute('data-save')) {
+          try {
+            const list = reviews();
+            if (!list.some(item => item.question === question && !item.done)) {
+              list.push({question,hint:reply.textContent || context(),answer:'',done:false,after:0});
+              saveReviews(list);
+            }
+            status.textContent = 'Duda guardada en tu diario.';
+          } catch { status.textContent = 'El navegador no pudo guardar la duda.'; }
+          return;
+        }
+        if (pending) return;
+        pending = true;
+        const version = generation;
+        const material = linux ? (document.querySelector('#linux-answer-title')?.textContent?.startsWith('Resumen') ? '#linux-notes' : '#linux-command') : '#entry-body';
+        status.textContent = 'Preparando la explicación…';
+        try {
+          const text = JSON.stringify({material:value(document.querySelector(material)).slice(0,4500),respuesta:context().slice(0,4500),aclaracion:reply.textContent?.slice(0,2000),pregunta:question,peticion:button.hasAttribute('data-simple')?'Explícamelo más fácil con otro ejemplo.':question});
+          const res = await fetch('/__local-ai/generate',{method:'POST',headers:{'Content-Type':'application/json','X-Walter-Lab':'local'},body:JSON.stringify({action:'follow-up',title:'Duda de estudio',text})});
+          const data = await res.json();
+          if (!res.ok || !data.text) throw new Error(data.error || 'Inténtalo de nuevo.');
+          if (version === generation) {reply.textContent=data.text;status.textContent='Respuesta lista.';}
+        } catch (error) {if(version === generation) status.textContent=error instanceof Error ? error.message : 'No se pudo consultar el tutor.';}
+        finally {pending=false;}
+      });
+    }
+  }
+  customElements.define('study-follow-up',StudyFollowUp);
+</script>
